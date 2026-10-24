@@ -176,53 +176,93 @@ export interface Expense {
     createdAt: string;
 }
 
-export function getAdminDashboardUsers(
+export async function getAdminDashboardUsers(
     accessToken: string,
 ): Promise<UserDashboardStats> {
-    return apiData<UserDashboardStats>(
-        "/api/admin/dashboard/users",
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return await apiData<UserDashboardStats>("/api/admin/dashboard/users", { method: "GET" }, accessToken);
+    return {
+        totalUsers: 24,
+        activeUsers: 22,
+        inactiveUsers: 2,
+        requesters: 16,
+        volunteers: 6,
+        collaborators: 1,
+        admins: 1,
+    };
 }
-export function getAdminDashboardSupportRequests(
+export async function getAdminDashboardSupportRequests(
     accessToken: string,
 ): Promise<SupportRequestDashboardStats> {
-    return apiData<SupportRequestDashboardStats>(
-        "/api/admin/dashboard/support-requests",
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return await apiData<SupportRequestDashboardStats>("/api/admin/dashboard/support-requests", { method: "GET" }, accessToken);
+    return {
+        totalSupportRequests: 15,
+        pending: 3,
+        approved: 5,
+        inProgress: 4,
+        rejected: 1,
+        completed: 2,
+        cancelled: 0,
+    };
 }
-export function getAdminDashboardCategories(
+export async function getAdminDashboardCategories(
     accessToken: string,
 ): Promise<CategoryDashboardStats> {
-    return apiData<CategoryDashboardStats>(
-        "/api/admin/dashboard/categories",
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return await apiData<CategoryDashboardStats>("/api/admin/dashboard/categories", { method: "GET" }, accessToken);
+    return {
+        totalCategories: 4,
+        activeCategories: 4,
+        categories: [
+            {
+                categoryId: "cat-1",
+                categoryName: "Cứu trợ khẩn cấp",
+                supportRequestCount: 6,
+            },
+            {
+                categoryId: "cat-2",
+                categoryName: "Lương thực & Nhu yếu phẩm",
+                supportRequestCount: 4,
+            },
+            {
+                categoryId: "cat-3",
+                categoryName: "Y tế & Thuốc men",
+                supportRequestCount: 3,
+            },
+            {
+                categoryId: "cat-4",
+                categoryName: "Giáo dục vùng cao",
+                supportRequestCount: 2,
+            },
+        ],
+    };
 }
-export function getAdminDashboardPosts(
+export async function getAdminDashboardPosts(
     accessToken: string,
 ): Promise<PostDashboardStats> {
-    return apiData<PostDashboardStats>(
-        "/api/admin/dashboard/posts",
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return await apiData<PostDashboardStats>("/api/admin/dashboard/posts", { method: "GET" }, accessToken);
+    return {
+        totalPosts: 8,
+        active: 7,
+        underReview: 1,
+        hidden: 0,
+        removed: 0,
+    };
 }
-export function getAdminDashboardReports(
+export async function getAdminDashboardReports(
     accessToken: string,
 ): Promise<ReportDashboardStats> {
-    return apiData<ReportDashboardStats>(
-        "/api/admin/dashboard/reports",
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return await apiData<ReportDashboardStats>("/api/admin/dashboard/reports", { method: "GET" }, accessToken);
+    return {
+        totalReports: 3,
+        supportRequestReports: 1,
+        postReports: 1,
+        userReports: 1,
+        pending: 2,
+        reviewed: 1,
+        resolved: 0,
+    };
 }
 
-export function getUsersList(
+export async function getUsersList(
     accessToken: string,
     params: {
         keyword?: string;
@@ -234,27 +274,74 @@ export function getUsersList(
 ): Promise<PageResponse<UserSummary>> {
     const query = new URLSearchParams();
     if (params.keyword) query.set("keyword", params.keyword);
-    if (params.role) query.set("role", params.role);
+    if (params.role) query.set("roleCode", params.role);
     if (params.page !== undefined) query.set("page", params.page.toString());
     if (params.size !== undefined) query.set("size", params.size.toString());
     if (params.sort) query.set("sort", params.sort);
 
-    return apiData<PageResponse<UserSummary>>(
-        `/api/v1/users?${query.toString()}`,
-        { method: "GET" },
-        accessToken,
-    );
+    try {
+        const res = await apiData<any>(
+            `/api/v1/admin/users?${query.toString()}`,
+            { method: "GET" },
+            accessToken,
+        );
+        return {
+            content: (res.content || []).map((u: any) => ({
+                id: u.id,
+                fullName: u.fullName,
+                email: u.email,
+                role: (u.roleCode || u.role) as UserRole,
+                avatarUrl: u.avatarUrl ?? null,
+                phoneNumber: u.phoneNumber ?? u.phone ?? null,
+                isActive: u.status === "ACTIVE" || Boolean(u.isActive),
+                createdAt: u.createdAt,
+            })),
+            totalElements: res.totalElements ?? 0,
+            totalPages: res.totalPages ?? 1,
+            size: res.size ?? 20,
+            number: res.page ?? res.number ?? 0,
+            first: (res.page ?? res.number ?? 0) === 0,
+            last: (res.page ?? res.number ?? 0) >= (res.totalPages ?? 1) - 1,
+            numberOfElements: res.content?.length ?? 0,
+            empty: !res.content || res.content.length === 0,
+        };
+    } catch (err: any) {
+        if (err?.status === 404) {
+            return {
+                content: [],
+                totalElements: 0,
+                totalPages: 1,
+                size: params.size ?? 20,
+                number: params.page ?? 0,
+                first: true,
+                last: true,
+                numberOfElements: 0,
+                empty: true,
+            };
+        }
+        throw err;
+    }
 }
 
-export function getUserDetail(
+export async function getUserDetail(
     accessToken: string,
     userId: string,
 ): Promise<UserSummary> {
-    return apiData<UserSummary>(
-        `/api/v1/users/${encodeURIComponent(userId)}`,
+    const u = await apiData<any>(
+        `/api/v1/admin/users/${encodeURIComponent(userId)}`,
         { method: "GET" },
         accessToken,
     );
+    return {
+        id: u.id,
+        fullName: u.fullName,
+        email: u.email,
+        role: (u.roleCode || u.role) as UserRole,
+        avatarUrl: u.avatarUrl ?? null,
+        phoneNumber: u.phoneNumber ?? u.phone ?? null,
+        isActive: u.status === "ACTIVE" || Boolean(u.isActive),
+        createdAt: u.createdAt,
+    };
 }
 
 export function patchUserRole(
@@ -263,10 +350,10 @@ export function patchUserRole(
     payload: { role: UserRole },
 ): Promise<void> {
     return apiData<void>(
-        `/api/v1/users/${encodeURIComponent(userId)}/role`,
+        `/api/v1/admin/users/${encodeURIComponent(userId)}/role`,
         {
             method: "PATCH",
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ roleCode: payload.role }),
         },
         accessToken,
     );
@@ -278,16 +365,254 @@ export function patchUserStatus(
     payload: { isActive: boolean },
 ): Promise<void> {
     return apiData<void>(
-        `/api/v1/users/${encodeURIComponent(userId)}/status`,
+        `/api/v1/admin/users/${encodeURIComponent(userId)}/status`,
         {
             method: "PATCH",
-            body: JSON.stringify(payload),
+            body: JSON.stringify({
+                status: payload.isActive ? "ACTIVE" : "SUSPENDED",
+            }),
         },
         accessToken,
     );
 }
 
-export function getAdminSupportRequests(
+// ============================================================================
+// MOCK DATA: Dữ liệu mẫu cho các module quản trị chưa có backend microservices
+// ============================================================================
+
+const MOCK_ADMIN_SUPPORT_REQUESTS: SupportRequestSummary[] = [
+    {
+        id: "req-1",
+        title: "Cứu trợ lương thực và nước sạch sau bão lũ tại Quảng Bình",
+        categoryName: "Cứu trợ khẩn cấp",
+        categoryId: "cat-1",
+        requesterId: "u-1",
+        requesterName: "Nguyễn Văn An",
+        requesterAvatarUrl: null,
+        status: "APPROVED",
+        address: "Xã Tân Hóa, Huyện Minh Hóa, Tỉnh Quảng Bình",
+        latitude: 17.76,
+        longitude: 105.99,
+        createdAt: "2026-10-20T09:00:00Z",
+    },
+    {
+        id: "req-2",
+        title: "Hỗ trợ áo ấm và sách vở cho học sinh điểm trường Mèo Vạc",
+        categoryName: "Giáo dục vùng cao",
+        categoryId: "cat-4",
+        requesterId: "u-2",
+        requesterName: "Trần Thị Mai",
+        requesterAvatarUrl: null,
+        status: "IN_PROGRESS",
+        address: "Xã Pả Vi, Huyện Mèo Vạc, Tỉnh Hà Giang",
+        latitude: 23.16,
+        longitude: 105.41,
+        createdAt: "2026-10-21T10:30:00Z",
+    },
+    {
+        id: "req-3",
+        title: "Thuốc men y tế sơ cấp cứu cho bà con vùng ngập sâu Lệ Thủy",
+        categoryName: "Y tế & Thuốc men",
+        categoryId: "cat-3",
+        requesterId: "u-3",
+        requesterName: "Lê Hoàng Long",
+        requesterAvatarUrl: null,
+        status: "PENDING",
+        address: "Huyện Lệ Thủy, Tỉnh Quảng Bình",
+        latitude: 17.21,
+        longitude: 106.78,
+        createdAt: "2026-10-23T14:15:00Z",
+    },
+    {
+        id: "req-4",
+        title: "Cung cấp gạo và mì gói hỗ trợ các hộ gia đình neo đơn",
+        categoryName: "Lương thực & Nhu yếu phẩm",
+        categoryId: "cat-2",
+        requesterId: "u-4",
+        requesterName: "Phạm Minh Đức",
+        requesterAvatarUrl: null,
+        status: "COMPLETED",
+        address: "Thị xã Ba Đồn, Tỉnh Quảng Bình",
+        latitude: 17.75,
+        longitude: 106.42,
+        createdAt: "2026-10-15T08:00:00Z",
+    },
+];
+
+const MOCK_ADMIN_CATEGORIES: Category[] = [
+    {
+        id: "cat-1",
+        name: "Cứu trợ khẩn cấp",
+        code: "EMERGENCY",
+        description: "Hỗ trợ khẩn cấp thiên tai, bão lũ, sạt lở và sự cố bất ngờ",
+        iconUrl: null,
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+        updatedAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "cat-2",
+        name: "Lương thực & Nhu yếu phẩm",
+        code: "FOOD_SUPPLIES",
+        description: "Gạo, mì gói, nước sạch, thực phẩm khô và vật dụng thiết yếu",
+        iconUrl: null,
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+        updatedAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "cat-3",
+        name: "Y tế & Thuốc men",
+        code: "MEDICAL",
+        description: "Thuốc thiết yếu, vật tư y tế, sơ cứu và chăm sóc sức khỏe",
+        iconUrl: null,
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+        updatedAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "cat-4",
+        name: "Giáo dục vùng cao",
+        code: "EDUCATION",
+        description: "Sách vở, áo ấm, học bổng và thiết bị học tập cho học sinh vùng cao",
+        iconUrl: null,
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+        updatedAt: "2026-01-10T08:00:00Z",
+    },
+];
+
+const MOCK_ADMIN_LOCATIONS: SupportLocation[] = [
+    {
+        id: "loc-1",
+        name: "Điểm tiếp nhận Hà Nội - Cầu Giấy",
+        description: "Kho tập kết hàng hóa và phân loại nhu yếu phẩm khu vực miền Bắc",
+        latitude: 21.0285,
+        longitude: 105.8542,
+        address: "Số 18 Hoàng Quốc Việt, Cầu Giấy, Hà Nội",
+        contactPhone: "0912345678",
+        bankName: "Vietcombank",
+        bankAccountNumber: "0011001234567",
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "loc-2",
+        name: "Trạm điều phối Miền Trung - Đà Nẵng",
+        description: "Trung tâm tiếp nhận và chuyển tiếp hàng cứu hộ vào vùng bão lũ",
+        latitude: 16.0544,
+        longitude: 108.2022,
+        address: "120 Nguyễn Văn Linh, Hải Châu, Đà Nẵng",
+        contactPhone: "0987654321",
+        bankName: "BIDV",
+        bankAccountNumber: "12310009876543",
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "loc-3",
+        name: "Trung tâm cứu trợ TP. Hồ Chí Minh",
+        description: "Điểm quyên góp và tiếp nhận hỗ trợ khu vực phía Nam",
+        latitude: 10.7769,
+        longitude: 106.7009,
+        address: "45 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+        contactPhone: "0903123456",
+        bankName: "Techcombank",
+        bankAccountNumber: "19033445566778",
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+];
+
+const MOCK_ADMIN_REPORTS: Report[] = [
+    {
+        id: "rep-1",
+        targetId: "post-1",
+        targetType: "POST",
+        reason: "Nghi vấn sai lệch địa điểm tiếp nhận",
+        description: "Người dùng thắc mắc địa điểm tiếp nhận có thay đổi so với thông báo ban đầu.",
+        reporterId: "u-9",
+        reporterName: "Ngô Văn Hùng",
+        status: "PENDING",
+        resolutionNote: null,
+        resolvedById: null,
+        resolvedByName: null,
+        createdAt: "2026-10-23T11:00:00Z",
+        resolvedAt: null,
+    },
+    {
+        id: "rep-2",
+        targetId: "req-3",
+        targetType: "SUPPORT_REQUEST",
+        reason: "Yêu cầu cần xác minh khẩn cấp",
+        description: "Khu vực huyện Lệ Thủy nước dâng nhanh, cần ưu tiên duyệt sớm hỗ trợ thuốc men.",
+        reporterId: "u-10",
+        reporterName: "Đỗ Thị Hà",
+        status: "REVIEWED",
+        resolutionNote: "Đang liên hệ trạm y tế xã xác nhận danh mục thuốc",
+        resolvedById: "admin",
+        resolvedByName: "HelpHub Admin",
+        createdAt: "2026-10-22T08:30:00Z",
+        resolvedAt: null,
+    },
+];
+
+const MOCK_ADMIN_UPGRADES: RoleUpgradeRequest[] = [
+    {
+        id: "up-1",
+        userId: "u-2",
+        userFullName: "Trần Thị Mai",
+        volunteerId: "vol-2",
+        reason: "Đã có 2 năm kinh nghiệm phụ trách các đoàn cứu trợ vùng cao, muốn nâng cấp thành Cộng tác viên (Collaborator) để quản lý điểm tập kết Hà Giang.",
+        supportingDocumentsUrl: null,
+        status: "PENDING",
+        rejectionReason: null,
+        processedById: null,
+        processedByName: null,
+        createdAt: "2026-10-21T14:00:00Z",
+        processedAt: null,
+    },
+];
+
+const MOCK_ADMIN_FUNDS: CommunityFund[] = [
+    {
+        id: "fund-1",
+        name: "Quỹ Cứu Trợ Bão Lũ Miền Trung 2026",
+        description: "Quỹ chuyên biệt mua sắm thuyền cứu hộ, áo phao, nước sạch và hỗ trợ sửa chữa nhà tốc mái cho bà con vùng bão lũ.",
+        totalBalance: 125000000,
+        isActive: true,
+        createdAt: "2026-10-01T00:00:00Z",
+    },
+];
+
+const MOCK_ADMIN_EXPENSES: Expense[] = [
+    {
+        id: "exp-1",
+        fundId: "fund-1",
+        fundName: "Quỹ Cứu Trợ Bão Lũ Miền Trung 2026",
+        supportRequestId: "req-1",
+        supportRequestTitle: "Cứu trợ lương thực Quảng Bình",
+        amount: 35000000,
+        description: "Mua 100 áo phao cứu sinh đạt chuẩn và 1 tấn gạo chuyển khẩn cấp vào vùng rốn lũ Tân Hóa",
+        createdById: "admin",
+        createdByName: "HelpHub Admin",
+        createdAt: "2026-10-21T10:00:00Z",
+    },
+    {
+        id: "exp-2",
+        fundId: "fund-1",
+        fundName: "Quỹ Cứu Trợ Bão Lũ Miền Trung 2026",
+        supportRequestId: null,
+        supportRequestTitle: null,
+        amount: 15000000,
+        description: "Chi phí thuê 2 chuyến xe tải vận chuyển nhu yếu phẩm Hà Nội - Đà Nẵng",
+        createdById: "admin",
+        createdByName: "HelpHub Admin",
+        createdAt: "2026-10-22T14:00:00Z",
+    },
+];
+
+export async function getAdminSupportRequests(
     accessToken: string,
     params: {
         status?: SupportRequestStatus;
@@ -296,321 +621,300 @@ export function getAdminSupportRequests(
         createdTo?: string;
     },
 ): Promise<SupportRequestSummary[]> {
-    const query = new URLSearchParams();
-    if (params.status) query.set("status", params.status);
-    if (params.categoryId) query.set("categoryId", params.categoryId);
-    if (params.createdFrom) query.set("createdFrom", params.createdFrom);
-    if (params.createdTo) query.set("createdTo", params.createdTo);
-
-    return apiData<SupportRequestSummary[]>(
-        `/api/v1/support-requests?${query.toString()}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportRequestSummary[]>(`/api/v1/support-requests?${query.toString()}`, { method: "GET" }, accessToken);
+    if (!params.status) return MOCK_ADMIN_SUPPORT_REQUESTS;
+    return MOCK_ADMIN_SUPPORT_REQUESTS.filter((req) => req.status === params.status);
 }
 
-export function approveSupportRequest(
+export async function approveSupportRequest(
     accessToken: string,
     requestId: string,
 ): Promise<void> {
-    return apiData<void>(
-        `/api/v1/support-requests/${encodeURIComponent(requestId)}/approve`,
-        { method: "PATCH" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/v1/support-requests/${encodeURIComponent(requestId)}/approve`, { method: "PATCH" }, accessToken);
+    const item = MOCK_ADMIN_SUPPORT_REQUESTS.find((r) => r.id === requestId);
+    if (item) item.status = "APPROVED";
+    return Promise.resolve();
 }
 
-export function rejectSupportRequest(
+export async function rejectSupportRequest(
     accessToken: string,
     requestId: string,
     payload: { rejectionReason: string },
 ): Promise<void> {
-    return apiData<void>(
-        `/api/v1/support-requests/${encodeURIComponent(requestId)}/reject`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/v1/support-requests/${encodeURIComponent(requestId)}/reject`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
+    const item = MOCK_ADMIN_SUPPORT_REQUESTS.find((r) => r.id === requestId);
+    if (item) item.status = "REJECTED";
+    return Promise.resolve();
 }
 
-export function assignSupportLocationToRequest(
+export async function assignSupportLocationToRequest(
     accessToken: string,
     requestId: string,
     payload: { supportLocationId: string },
 ): Promise<void> {
-    return apiData<void>(
-        `/api/v1/support-requests/${encodeURIComponent(requestId)}/assign-support-location`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/v1/support-requests/${encodeURIComponent(requestId)}/assign-support-location`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
+    return Promise.resolve();
 }
 
-export function getAllReports(accessToken: string): Promise<Report[]> {
-    return apiData<Report[]>("/api/reports", { method: "GET" }, accessToken);
+export async function getAllReports(accessToken: string): Promise<Report[]> {
+    // [BE PENDING]: return apiData<Report[]>("/api/reports", { method: "GET" }, accessToken);
+    return MOCK_ADMIN_REPORTS;
 }
 
-export function getPendingReports(accessToken: string): Promise<Report[]> {
-    return apiData<Report[]>(
-        "/api/reports/pending",
-        { method: "GET" },
-        accessToken,
-    );
+export async function getPendingReports(accessToken: string): Promise<Report[]> {
+    // [BE PENDING]: return apiData<Report[]>("/api/reports/pending", { method: "GET" }, accessToken);
+    return MOCK_ADMIN_REPORTS.filter((r) => r.status === "PENDING");
 }
 
-export function getReportDetail(
+export async function getReportDetail(
     accessToken: string,
     reportId: string,
 ): Promise<Report> {
-    return apiData<Report>(
-        `/api/reports/${encodeURIComponent(reportId)}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<Report>(`/api/reports/${encodeURIComponent(reportId)}`, { method: "GET" }, accessToken);
+    const found = MOCK_ADMIN_REPORTS.find((r) => r.id === reportId);
+    if (found) return found;
+    return MOCK_ADMIN_REPORTS[0];
 }
 
-export function reviewReport(
+export async function reviewReport(
     accessToken: string,
     reportId: string,
     payload: { resolutionNote: string },
 ): Promise<void> {
-    return apiData<void>(
-        `/api/reports/${encodeURIComponent(reportId)}/review`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/reports/${encodeURIComponent(reportId)}/review`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
+    const item = MOCK_ADMIN_REPORTS.find((r) => r.id === reportId);
+    if (item) {
+        item.status = "REVIEWED";
+        item.resolutionNote = payload.resolutionNote;
+    }
+    return Promise.resolve();
 }
 
-export function resolveReport(
+export async function resolveReport(
     accessToken: string,
     reportId: string,
     payload: { resolutionNote: string; supportRequestRejectionReason?: string },
 ): Promise<void> {
-    return apiData<void>(
-        `/api/reports/${encodeURIComponent(reportId)}/resolve`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/reports/${encodeURIComponent(reportId)}/resolve`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
+    const item = MOCK_ADMIN_REPORTS.find((r) => r.id === reportId);
+    if (item) {
+        item.status = "RESOLVED";
+        item.resolutionNote = payload.resolutionNote;
+        item.resolvedAt = new Date().toISOString();
+    }
+    return Promise.resolve();
 }
 
-export function getAdminCategories(
+export async function getAdminCategories(
     accessToken: string,
     activeOnly: boolean = false,
 ): Promise<Category[]> {
-    return apiData<Category[]>(
-        `/api/v1/categories?activeOnly=${activeOnly}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<Category[]>(`/api/v1/categories?activeOnly=${activeOnly}`, { method: "GET" }, accessToken);
+    if (activeOnly) return MOCK_ADMIN_CATEGORIES.filter((c) => c.isActive);
+    return MOCK_ADMIN_CATEGORIES;
 }
 
-export function createCategory(
+export async function createCategory(
     accessToken: string,
     payload: Omit<Category, "id" | "isActive" | "createdAt" | "updatedAt">,
 ): Promise<Category> {
-    return apiData<Category>(
-        "/api/v1/categories",
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<Category>("/api/v1/categories", { method: "POST", body: JSON.stringify(payload) }, accessToken);
+    const newCat: Category = {
+        id: "cat-" + Date.now(),
+        name: payload.name,
+        code: payload.code,
+        description: payload.description,
+        iconUrl: payload.iconUrl,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+    MOCK_ADMIN_CATEGORIES.push(newCat);
+    return newCat;
 }
 
-export function updateCategory(
+export async function updateCategory(
     accessToken: string,
     categoryId: string,
     payload: Omit<Category, "id" | "isActive" | "createdAt" | "updatedAt">,
 ): Promise<Category> {
-    return apiData<Category>(
-        `/api/v1/categories/${encodeURIComponent(categoryId)}`,
-        {
-            method: "PUT",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<Category>(`/api/v1/categories/${encodeURIComponent(categoryId)}`, { method: "PUT", body: JSON.stringify(payload) }, accessToken);
+    const cat = MOCK_ADMIN_CATEGORIES.find((c) => c.id === categoryId);
+    if (cat) {
+        cat.name = payload.name;
+        cat.code = payload.code;
+        cat.description = payload.description;
+        cat.updatedAt = new Date().toISOString();
+        return cat;
+    }
+    throw new Error("Category not found");
 }
 
-export function patchCategoryStatus(
+export async function patchCategoryStatus(
     accessToken: string,
     categoryId: string,
     payload: { isActive: boolean },
 ): Promise<void> {
-    return apiData<void>(
-        `/api/v1/categories/${encodeURIComponent(categoryId)}/status`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/v1/categories/${encodeURIComponent(categoryId)}/status`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
+    const cat = MOCK_ADMIN_CATEGORIES.find((c) => c.id === categoryId);
+    if (cat) cat.isActive = payload.isActive;
+    return Promise.resolve();
 }
 
-export function getAdminSupportLocations(
+export async function getAdminSupportLocations(
     accessToken: string,
     activeOnly: boolean = false,
 ): Promise<SupportLocation[]> {
-    return apiData<SupportLocation[]>(
-        `/api/v1/support-locations?activeOnly=${activeOnly}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportLocation[]>(`/api/v1/support-locations?activeOnly=${activeOnly}`, { method: "GET" }, accessToken);
+    if (activeOnly) return MOCK_ADMIN_LOCATIONS.filter((l) => l.isActive);
+    return MOCK_ADMIN_LOCATIONS;
 }
 
-export function createSupportLocation(
+export async function createSupportLocation(
     accessToken: string,
     payload: Omit<SupportLocation, "id" | "isActive" | "createdAt">,
 ): Promise<SupportLocation> {
-    return apiData<SupportLocation>(
-        "/api/v1/support-locations",
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportLocation>("/api/v1/support-locations", { method: "POST", body: JSON.stringify(payload) }, accessToken);
+    const newLoc: SupportLocation = {
+        id: "loc-" + Date.now(),
+        name: payload.name,
+        description: payload.description,
+        latitude: payload.latitude,
+        longitude: payload.longitude,
+        address: payload.address,
+        contactPhone: payload.contactPhone,
+        bankName: payload.bankName,
+        bankAccountNumber: payload.bankAccountNumber,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+    };
+    MOCK_ADMIN_LOCATIONS.push(newLoc);
+    return newLoc;
 }
 
-export function updateSupportLocation(
+export async function updateSupportLocation(
     accessToken: string,
     locationId: string,
     payload: Omit<SupportLocation, "id" | "isActive" | "createdAt">,
 ): Promise<SupportLocation> {
-    return apiData<SupportLocation>(
-        `/api/v1/support-locations/${encodeURIComponent(locationId)}`,
-        {
-            method: "PUT",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportLocation>(`/api/v1/support-locations/${encodeURIComponent(locationId)}`, { method: "PUT", body: JSON.stringify(payload) }, accessToken);
+    const loc = MOCK_ADMIN_LOCATIONS.find((l) => l.id === locationId);
+    if (loc) {
+        Object.assign(loc, payload);
+        return loc;
+    }
+    throw new Error("Location not found");
 }
 
-export function patchSupportLocationStatus(
+export async function patchSupportLocationStatus(
     accessToken: string,
     locationId: string,
     payload: { isActive: boolean },
 ): Promise<void> {
-    return apiData<void>(
-        `/api/v1/support-locations/${encodeURIComponent(locationId)}/status`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/v1/support-locations/${encodeURIComponent(locationId)}/status`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
+    const loc = MOCK_ADMIN_LOCATIONS.find((l) => l.id === locationId);
+    if (loc) loc.isActive = payload.isActive;
+    return Promise.resolve();
 }
 
-export function getRoleUpgradeRequestsList(
+export async function getRoleUpgradeRequestsList(
     accessToken: string,
     params: { status?: RoleUpgradeRequestStatus; page?: number; size?: number },
 ): Promise<PageResponse<RoleUpgradeRequest>> {
-    const query = new URLSearchParams();
-    if (params.status) query.set("status", params.status);
-    if (params.page !== undefined) query.set("page", params.page.toString());
-    if (params.size !== undefined) query.set("size", params.size.toString());
-    query.set("sort", "createdAt,desc");
-
-    return apiData<PageResponse<RoleUpgradeRequest>>(
-        `/api/v1/role-upgrade-requests?${query.toString()}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<PageResponse<RoleUpgradeRequest>>(`/api/v1/role-upgrade-requests?${query.toString()}`, { method: "GET" }, accessToken);
+    const content = params.status
+        ? MOCK_ADMIN_UPGRADES.filter((u) => u.status === params.status)
+        : MOCK_ADMIN_UPGRADES;
+    return {
+        content,
+        totalElements: content.length,
+        totalPages: 1,
+        size: params.size ?? 10,
+        number: params.page ?? 0,
+        first: true,
+        last: true,
+        numberOfElements: content.length,
+        empty: content.length === 0,
+    };
 }
 
-export function approveRoleUpgradeRequest(
+export async function approveRoleUpgradeRequest(
     accessToken: string,
     requestId: string,
 ): Promise<void> {
-    return apiData<void>(
-        `/api/v1/role-upgrade-requests/${encodeURIComponent(requestId)}/approve`,
-        { method: "PATCH" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/v1/role-upgrade-requests/${encodeURIComponent(requestId)}/approve`, { method: "PATCH" }, accessToken);
+    const item = MOCK_ADMIN_UPGRADES.find((u) => u.id === requestId);
+    if (item) item.status = "APPROVED";
+    return Promise.resolve();
 }
 
-export function rejectRoleUpgradeRequest(
+export async function rejectRoleUpgradeRequest(
     accessToken: string,
     requestId: string,
     payload: { rejectionReason: string },
 ): Promise<void> {
-    return apiData<void>(
-        `/api/v1/role-upgrade-requests/${encodeURIComponent(requestId)}/reject`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<void>(`/api/v1/role-upgrade-requests/${encodeURIComponent(requestId)}/reject`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
+    const item = MOCK_ADMIN_UPGRADES.find((u) => u.id === requestId);
+    if (item) {
+        item.status = "REJECTED";
+        item.rejectionReason = payload.rejectionReason;
+    }
+    return Promise.resolve();
 }
 
-export function getCommunityFunds(
+export async function getCommunityFunds(
     accessToken: string,
     activeOnly: boolean = false,
 ): Promise<CommunityFund[]> {
-    return apiData<CommunityFund[]>(
-        `/api/v1/community-funds?activeOnly=${activeOnly}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<CommunityFund[]>(`/api/v1/community-funds?activeOnly=${activeOnly}`, { method: "GET" }, accessToken);
+    if (activeOnly) return MOCK_ADMIN_FUNDS.filter((f) => f.isActive);
+    return MOCK_ADMIN_FUNDS;
 }
 
-export function createCommunityFund(
+export async function createCommunityFund(
     accessToken: string,
     payload: Omit<
         CommunityFund,
         "id" | "isActive" | "createdAt" | "totalBalance"
     >,
 ): Promise<CommunityFund> {
-    return apiData<CommunityFund>(
-        "/api/v1/community-funds",
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<CommunityFund>("/api/v1/community-funds", { method: "POST", body: JSON.stringify(payload) }, accessToken);
+    const newFund: CommunityFund = {
+        id: "fund-" + Date.now(),
+        name: payload.name,
+        description: payload.description,
+        totalBalance: 0,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+    };
+    MOCK_ADMIN_FUNDS.push(newFund);
+    return newFund;
 }
 
-export function updateCommunityFund(
+export async function updateCommunityFund(
     accessToken: string,
     fundId: string,
     payload: Omit<CommunityFund, "id" | "createdAt" | "totalBalance">,
 ): Promise<CommunityFund> {
-    return apiData<CommunityFund>(
-        `/api/v1/community-funds/${encodeURIComponent(fundId)}`,
-        {
-            method: "PUT",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<CommunityFund>(`/api/v1/community-funds/${encodeURIComponent(fundId)}`, { method: "PUT", body: JSON.stringify(payload) }, accessToken);
+    const fund = MOCK_ADMIN_FUNDS.find((f) => f.id === fundId);
+    if (fund) {
+        fund.name = payload.name;
+        fund.description = payload.description;
+        return fund;
+    }
+    throw new Error("Fund not found");
 }
 
-export function getFundExpenses(
+export async function getFundExpenses(
     accessToken: string,
     fundId: string,
 ): Promise<Expense[]> {
-    return apiData<Expense[]>(
-        `/api/v1/community-funds/${encodeURIComponent(fundId)}/expenses`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<Expense[]>(`/api/v1/community-funds/${encodeURIComponent(fundId)}/expenses`, { method: "GET" }, accessToken);
+    return MOCK_ADMIN_EXPENSES.filter((e) => e.fundId === fundId);
 }
 
-export function createExpense(
+export async function createExpense(
     accessToken: string,
     payload: {
         fundId: string;
@@ -619,12 +923,20 @@ export function createExpense(
         description: string;
     },
 ): Promise<Expense> {
-    return apiData<Expense>(
-        "/api/v1/expenses",
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<Expense>("/api/v1/expenses", { method: "POST", body: JSON.stringify(payload) }, accessToken);
+    const fund = MOCK_ADMIN_FUNDS.find((f) => f.id === payload.fundId);
+    const newExp: Expense = {
+        id: "exp-" + Date.now(),
+        fundId: payload.fundId,
+        fundName: fund ? fund.name : "Quỹ",
+        supportRequestId: payload.supportRequestId,
+        supportRequestTitle: payload.supportRequestId ? "Yêu cầu cứu trợ" : null,
+        amount: payload.amount,
+        description: payload.description,
+        createdById: "admin",
+        createdByName: "HelpHub Admin",
+        createdAt: new Date().toISOString(),
+    };
+    MOCK_ADMIN_EXPENSES.unshift(newExp);
+    return newExp;
 }

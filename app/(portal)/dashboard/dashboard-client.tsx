@@ -52,8 +52,12 @@ export default function DashboardClient() {
       } else {
         setRequests(await getSupportRequests(token));
       }
-    } catch (loadError) {
-      setError(getErrorMessage(loadError));
+    } catch (loadError: any) {
+      if (loadError?.status === 404) {
+        setRequests([]);
+      } else {
+        setError(getErrorMessage(loadError));
+      }
     } finally {
       setLoading(false);
     }

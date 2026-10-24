@@ -4,6 +4,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useId, useState } from "react";
 
+import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     ApiError,
     forgotPassword,
@@ -113,9 +118,9 @@ export default function AuthClient() {
                 password: loginForm.password,
             });
 
-            if (!auth.accessToken || !auth.refreshToken) {
+            if (!auth.accessToken) {
                 throw new ApiError(
-                    "The login response did not include session tokens.",
+                    "The login response did not include an access token.",
                     500,
                     auth,
                 );
@@ -821,13 +826,20 @@ function ResetPasswordForm({
 
 function SubmitButton({ busy, label }: { busy: boolean; label: string }) {
     return (
-        <button
+        <Button
             type="submit"
             disabled={busy}
-            className="mt-2 h-11 w-full rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="mt-2 h-11 w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm shadow-sm transition"
         >
-            {busy ? "Working..." : label}
-        </button>
+            {busy ? (
+                <>
+                    <Loader2 className="size-4 animate-spin mr-2" />
+                    Working...
+                </>
+            ) : (
+                label
+            )}
+        </Button>
     );
 }
 
@@ -841,14 +853,15 @@ function BackButton({
     onClick: () => void;
 }) {
     return (
-        <button
+        <Button
             type="button"
+            variant="outline"
             disabled={Boolean(busy)}
             onClick={onClick}
-            className="h-10 w-full rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-800 disabled:cursor-not-allowed disabled:text-slate-400"
+            className="h-10 w-full font-medium text-slate-700 hover:border-emerald-300 hover:text-emerald-800 transition"
         >
             {label}
-        </button>
+        </Button>
     );
 }
 
@@ -875,22 +888,22 @@ function TextField({
     const inputType = isPassword && passwordVisible ? "text" : type;
 
     return (
-        <div>
-            <label
+        <div className="space-y-1.5">
+            <Label
                 htmlFor={inputId}
-                className="mb-2 block text-sm font-medium text-slate-700"
+                className="text-sm font-medium text-slate-700"
             >
                 {label}
-            </label>
-            <span className="relative block">
-                <input
+            </Label>
+            <div className="relative">
+                <Input
                     {...inputProps}
                     id={inputId}
                     name={name}
                     type={inputType}
                     value={value}
                     onChange={(event) => onChange(event.target.value)}
-                    className={`h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 ${
+                    className={`h-11 bg-white px-3 text-sm text-slate-950 transition placeholder:text-slate-400 focus-visible:ring-emerald-600 ${
                         isPassword ? "pr-11" : ""
                     }`}
                 />
@@ -906,12 +919,16 @@ function TextField({
                         onClick={() =>
                             setPasswordVisible((current) => !current)
                         }
-                        className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                        className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-emerald-700"
                     >
-                        <EyeIcon crossed={passwordVisible} />
+                        {passwordVisible ? (
+                            <EyeOff className="size-4" />
+                        ) : (
+                            <Eye className="size-4" />
+                        )}
                     </button>
                 ) : null}
-            </span>
+            </div>
         </div>
     );
 }
@@ -936,16 +953,23 @@ function EyeIcon({ crossed }: { crossed: boolean }) {
 }
 
 function NoticeBanner({ notice }: { notice: Exclude<Notice, null> }) {
+    const isSuccess = notice.type === "success";
+
     return (
         <div
-            className={`mt-4 rounded-md border px-4 py-3 text-sm ${
-                notice.type === "success"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                    : "border-rose-200 bg-rose-50 text-rose-900"
+            className={`mt-4 flex items-start gap-2.5 rounded-lg border px-4 py-3 text-sm shadow-xs ${
+                isSuccess
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                    : "border-rose-200 bg-rose-50 text-rose-950"
             }`}
             role="status"
         >
-            {notice.message}
+            {isSuccess ? (
+                <CheckCircle2 className="size-5 shrink-0 text-emerald-600 mt-0.5" />
+            ) : (
+                <AlertCircle className="size-5 shrink-0 text-rose-600 mt-0.5" />
+            )}
+            <div className="flex-1 leading-5">{notice.message}</div>
         </div>
     );
 }

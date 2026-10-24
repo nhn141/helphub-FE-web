@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { MapPin, User, ArrowUpRight, Clock } from "lucide-react";
 
 import { StatusBadge } from "@/components/support-ui";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import type { SupportRequestSummary } from "@/lib/api";
 import { formatDateTime } from "@/lib/support-request-ui";
 
@@ -12,81 +15,55 @@ export function SupportRequestCard({
   footer?: React.ReactNode;
 }) {
   return (
-    <article className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
-      <div className="flex items-start justify-between gap-3">
-        <span className="inline-flex rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800">
+    <Card className="group flex h-full flex-col overflow-hidden border border-border/80 bg-card transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-5 pb-2">
+        <Badge
+          variant="secondary"
+          className="bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-medium px-2.5 py-0.5"
+        >
           {request.categoryName}
-        </span>
+        </Badge>
         <StatusBadge status={request.status} />
-      </div>
+      </CardHeader>
 
-      <Link
-        href={`/support-requests/${request.id}`}
-        className="mt-4 text-lg font-bold leading-7 text-slate-950 transition group-hover:text-emerald-800"
-      >
-        {request.title}
-      </Link>
+      <CardContent className="flex flex-1 flex-col p-5 pt-3">
+        <Link
+          href={`/support-requests/${request.id}`}
+          className="group/link flex items-start justify-between gap-2 text-lg font-bold leading-snug text-foreground transition hover:text-emerald-700"
+        >
+          <span>{request.title}</span>
+          <ArrowUpRight className="size-4 shrink-0 opacity-0 transition-all duration-200 group-hover/link:opacity-100 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 text-emerald-600" />
+        </Link>
 
-      <div className="mt-4 space-y-2 text-sm text-slate-500">
-        <p className="flex items-center gap-2">
-          <PersonIcon />
-          <span className="truncate">{request.requesterName}</span>
-        </p>
-        <p className="flex items-start gap-2">
-          <LocationIcon />
-          <span className="line-clamp-2">
-            {request.address || "No address provided"}
+        <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <User className="size-4 shrink-0 text-muted-foreground/70" />
+            <span className="truncate font-medium text-foreground/80">{request.requesterName}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <MapPin className="size-4 shrink-0 text-muted-foreground/70 mt-0.5" />
+            <span className="line-clamp-2">
+              {request.address || "No address provided"}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+
+      <CardFooter className="mt-auto flex flex-col items-stretch border-t border-border/60 p-5 pt-3">
+        <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Clock className="size-3.5" />
+            {formatDateTime(request.createdAt)}
           </span>
-        </p>
-      </div>
-
-      <div className="mt-auto border-t border-slate-100 pt-4">
-        <div className="flex items-center justify-between gap-3 text-xs text-slate-400">
-          <span>{formatDateTime(request.createdAt)}</span>
           <Link
             href={`/support-requests/${request.id}`}
-            className="font-semibold text-emerald-700 hover:text-emerald-900"
+            className="font-semibold text-emerald-700 hover:text-emerald-800 transition"
           >
-            View details
+            View details &rarr;
           </Link>
         </div>
         {footer ? <div className="mt-3">{footer}</div> : null}
-      </div>
-    </article>
-  );
-}
-
-function PersonIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="mt-0.5 size-4 shrink-0"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <circle cx="12" cy="8" r="3" />
-      <path d="M5.5 20a6.5 6.5 0 0 1 13 0" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function LocationIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="mt-0.5 size-4 shrink-0"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <path
-        d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="10" r="2.5" />
-    </svg>
+      </CardFooter>
+    </Card>
   );
 }

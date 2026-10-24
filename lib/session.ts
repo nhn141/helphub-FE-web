@@ -50,7 +50,9 @@ export function clearSession() {
 }
 
 export function getAccessTokenExpiry(session: StoredSession): number {
-  return session.savedAt + session.accessTokenExpiresIn;
+  const seconds = session.expiresIn ?? session.accessTokenExpiresIn ?? 900;
+  const ms = seconds > 10_000_000 ? seconds : seconds * 1000;
+  return session.savedAt + ms;
 }
 
 export function isAccessTokenExpired(

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AlertCircle, CheckCircle2, Heart, Info, Loader2 } from "lucide-react";
 
+import { Button, buttonVariants } from "@/components/ui/button";
 import type {
   SupportRequestStatus,
   VolunteerAssignmentStatus,
@@ -71,10 +73,10 @@ export function AssignmentStatusBadge({
 
 export function LoadingBlock({ message = "Loading data..." }) {
   return (
-    <div className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white">
-      <div className="text-center">
-        <div className="mx-auto size-8 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-700" />
-        <p className="mt-3 text-sm text-slate-500">{message}</p>
+    <div className="flex min-h-64 items-center justify-center rounded-2xl border border-border/80 bg-card p-6 shadow-sm">
+      <div className="flex flex-col items-center text-center">
+        <Loader2 className="size-8 animate-spin text-emerald-600" />
+        <p className="mt-3 text-sm font-medium text-muted-foreground">{message}</p>
       </div>
     </div>
   );
@@ -92,18 +94,20 @@ export function EmptyState({
   actionLabel?: string;
 }) {
   return (
-    <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
-        <HeartIcon />
+    <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center transition-colors">
+      <div className="flex size-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shadow-sm ring-8 ring-emerald-50/50">
+        <Heart className="size-6 stroke-[1.8]" />
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-slate-950">{title}</h2>
-      <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
+      <h2 className="mt-4 text-lg font-bold tracking-tight text-foreground">{title}</h2>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
         {description}
       </p>
       {actionHref && actionLabel ? (
         <Link
           href={actionHref}
-          className="mt-5 inline-flex h-10 items-center rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800"
+          className={buttonVariants({
+            className: "mt-5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-sm h-10 px-4",
+          })}
         >
           {actionLabel}
         </Link>
@@ -120,35 +124,24 @@ export function Notice({
   children: ReactNode;
 }) {
   const styles = {
-    success: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    error: "border-rose-200 bg-rose-50 text-rose-900",
-    info: "border-sky-200 bg-sky-50 text-sky-900",
+    success: "border-emerald-200 bg-emerald-50 text-emerald-950 dark:bg-emerald-950/40 dark:text-emerald-200 dark:border-emerald-800",
+    error: "border-rose-200 bg-rose-50 text-rose-950 dark:bg-rose-950/40 dark:text-rose-200 dark:border-rose-800",
+    info: "border-sky-200 bg-sky-50 text-sky-950 dark:bg-sky-950/40 dark:text-sky-200 dark:border-sky-800",
+  };
+
+  const icons = {
+    success: <CheckCircle2 className="size-5 shrink-0 text-emerald-600 mt-0.5" />,
+    error: <AlertCircle className="size-5 shrink-0 text-rose-600 mt-0.5" />,
+    info: <Info className="size-5 shrink-0 text-sky-600 mt-0.5" />,
   };
 
   return (
     <div
       role={type === "error" ? "alert" : "status"}
-      className={`rounded-xl border px-4 py-3 text-sm leading-6 ${styles[type]}`}
+      className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm leading-6 shadow-xs ${styles[type]}`}
     >
-      {children}
+      {icons[type]}
+      <div className="flex-1">{children}</div>
     </div>
-  );
-}
-
-function HeartIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="size-6"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <path
-        d="M12 21s-8-4.7-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.3-8 11-8 11Z"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

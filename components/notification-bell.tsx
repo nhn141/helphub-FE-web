@@ -35,8 +35,10 @@ export function NotificationBell() {
                 if (!cancelled) {
                     setUnreadCount(res.unreadCount);
                 }
-            } catch (err) {
-                console.error("Failed to fetch unread count", err);
+            } catch (err: any) {
+                if (err?.status !== 404) {
+                    console.error("Failed to fetch unread count", err);
+                }
             }
         }
 
@@ -48,6 +50,12 @@ export function NotificationBell() {
 
     // WebSocket subscription for real-time notifications
     useEffect(() => {
+        // [BE PENDING] WebSocket notification-service chưa có trong backend microservices.
+        // Tạm thời bỏ qua kết nối để tránh spam lỗi kết nối trong console trình duyệt.
+        if (process.env.NEXT_PUBLIC_ENABLE_WS !== "true") {
+            return;
+        }
+
         let client: Client;
 
         async function connectWebSocket() {

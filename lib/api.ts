@@ -13,10 +13,12 @@ export type RegisterPayload = LoginPayload & {
 
 export type AuthResponse = {
     accessToken: string;
-    refreshToken: string;
-    tokenType: "Bearer";
-    accessTokenExpiresIn: number;
-    refreshTokenExpiresIn: number;
+    tokenType: "Bearer" | string;
+    expiresIn?: number;
+    sessionId?: string;
+    refreshToken?: string;
+    accessTokenExpiresIn?: number;
+    refreshTokenExpiresIn?: number;
     message?: string | null;
 };
 
@@ -272,6 +274,7 @@ async function apiRequest<T>(
 
     try {
         response = await fetch(`${API_BASE_URL}${path}`, {
+            credentials: "include",
             ...init,
             headers,
         });
@@ -295,25 +298,54 @@ export async function apiData<T>(
     return response.data;
 }
 
-export function login(payload: LoginPayload): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/auth/login", {
-        method: "POST",
-        body: JSON.stringify(payload),
-    });
+export type CsrfTokenResponse = {
+    headerName: string;
+    token: string;
+};
+
+export async function getCsrfToken(): Promise<string> {
+    const response = await apiRequest<ApiEnvelope<CsrfTokenResponse>>(
+        "/api/v1/auth/csrf",
+        {
+            method: "GET",
+        },
+    );
+    return response.data.token;
 }
 
-export function register(payload: RegisterPayload): Promise<RegisterResponse> {
-    return apiRequest<RegisterResponse>("/api/v1/auth/register", {
-        method: "POST",
-        body: JSON.stringify(payload),
-    });
+export async function login(payload: LoginPayload): Promise<AuthResponse> {
+    const csrfToken = await getCsrfToken();
+    const response = await apiRequest<ApiEnvelope<AuthResponse>>(
+        "/api/v1/auth/login",
+        {
+            method: "POST",
+            headers: {
+                "X-XSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+    return response.data;
+}
+
+export async function register(
+    payload: RegisterPayload,
+): Promise<RegisterResponse> {
+    const response = await apiRequest<ApiEnvelope<RegisterResponse>>(
+        "/api/v1/auth/register",
+        {
+            method: "POST",
+            body: JSON.stringify(payload),
+        },
+    );
+    return response.data;
 }
 
 export async function verifyEmail(
     payload: VerifyEmailPayload,
 ): Promise<string> {
     const response = await apiRequest<ApiEnvelope<null>>(
-        "/api/v1/auth/verify-email",
+        "/api/v1/auth/email/verify",
         {
             method: "POST",
             body: JSON.stringify(payload),
@@ -327,7 +359,7 @@ export async function resendEmailOtp(
     payload: ResendEmailOtpPayload,
 ): Promise<string> {
     const response = await apiRequest<ApiEnvelope<null>>(
-        "/api/v1/auth/resend-otp",
+        "/api/v1/auth/email/resend",
         {
             method: "POST",
             body: JSON.stringify(payload),
@@ -341,7 +373,7 @@ export async function forgotPassword(
     payload: ForgotPasswordPayload,
 ): Promise<string> {
     const response = await apiRequest<ApiEnvelope<null>>(
-        "/api/v1/auth/forgot-password",
+        "/api/v1/auth/password/forgot",
         {
             method: "POST",
             body: JSON.stringify(payload),
@@ -355,7 +387,7 @@ export async function resetPassword(
     payload: ResetPasswordPayload,
 ): Promise<string> {
     const response = await apiRequest<ApiEnvelope<null>>(
-        "/api/v1/auth/reset-password",
+        "/api/v1/auth/password/reset",
         {
             method: "POST",
             body: JSON.stringify(payload),
@@ -365,313 +397,606 @@ export async function resetPassword(
     return response.message;
 }
 
-export function refreshSession(refreshToken: string): Promise<AuthResponse> {
-    return apiRequest<AuthResponse>("/api/v1/auth/refresh", {
-        method: "POST",
-        body: JSON.stringify({ refreshToken }),
-    });
+export async function refreshSession(
+    refreshToken?: string,
+): Promise<AuthResponse> {
+    const csrfToken = await getCsrfToken();
+    const response = await apiRequest<ApiEnvelope<AuthResponse>>(
+        "/api/v1/auth/refresh",
+        {
+            method: "POST",
+            headers: {
+                "X-XSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify(refreshToken ? { refreshToken } : {}),
+        },
+    );
+    return response.data;
 }
 
-export function getMyProfile(accessToken: string): Promise<UserProfile> {
-    return apiData<UserProfile>(
+export async function getMyProfile(accessToken: string): Promise<UserProfile> {
+    const data = await apiData<any>(
         "/api/v1/users/me",
         { method: "GET" },
         accessToken,
     );
+    return {
+        id: data.id,
+        email: data.email,
+        fullName: data.fullName,
+        phone: data.phoneNumber ?? data.phone ?? null,
+        role: (data.roleCode ?? data.role ?? "REQUESTER") as UserRole,
+        avatarUrl: data.avatarUrl ?? null,
+        isActive: data.status === "ACTIVE" || Boolean(data.isActive),
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        lastLoginAt: data.lastLoginAt ?? null,
+    };
 }
 
-export function getCategories(accessToken: string): Promise<CategorySummary[]> {
-    return apiData<CategorySummary[]>(
-        "/api/v1/categories?activeOnly=true",
-        { method: "GET" },
-        accessToken,
-    );
+// ============================================================================
+// MOCK DATA: Dữ liệu mẫu hiển thị cho các tab chưa có API trên backend microservices
+// ============================================================================
+
+const MOCK_CATEGORIES: CategorySummary[] = [
+    {
+        id: "cat-1",
+        name: "Cứu trợ khẩn cấp",
+        code: "EMERGENCY",
+        iconUrl: null,
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "cat-2",
+        name: "Lương thực & Nhu yếu phẩm",
+        code: "FOOD_SUPPLIES",
+        iconUrl: null,
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "cat-3",
+        name: "Y tế & Thuốc men",
+        code: "MEDICAL",
+        iconUrl: null,
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "cat-4",
+        name: "Giáo dục vùng cao",
+        code: "EDUCATION",
+        iconUrl: null,
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+];
+
+const MOCK_LOCATIONS: SupportLocationSummary[] = [
+    {
+        id: "loc-1",
+        name: "Điểm tiếp nhận Hà Nội - Cầu Giấy",
+        latitude: 21.0285,
+        longitude: 105.8542,
+        address: "Số 18 Hoàng Quốc Việt, Cầu Giấy, Hà Nội",
+        contactPhone: "0912345678",
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "loc-2",
+        name: "Trạm điều phối Miền Trung - Đà Nẵng",
+        latitude: 16.0544,
+        longitude: 108.2022,
+        address: "120 Nguyễn Văn Linh, Hải Châu, Đà Nẵng",
+        contactPhone: "0987654321",
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+    {
+        id: "loc-3",
+        name: "Trung tâm cứu trợ TP. Hồ Chí Minh",
+        latitude: 10.7769,
+        longitude: 106.7009,
+        address: "45 Lê Duẩn, Quận 1, TP. Hồ Chí Minh",
+        contactPhone: "0903123456",
+        isActive: true,
+        createdAt: "2026-01-10T08:00:00Z",
+    },
+];
+
+const MOCK_SUPPORT_REQUESTS: SupportRequestDetail[] = [
+    {
+        id: "req-1",
+        title: "Cứu trợ lương thực và nước sạch sau bão lũ tại Quảng Bình",
+        description:
+            "Do ảnh hưởng của đợt bão lũ vừa qua, hơn 200 hộ dân tại xã Tân Hóa bị cô lập hoàn toàn. Nguồn nước sinh hoạt bị nhiễm bẩn, lương thực dự trữ cạn kiệt. Rất mong nhận được sự hỗ trợ khẩn cấp về gạo, nước uống đóng chai và thuốc men.",
+        categoryName: "Cứu trợ khẩn cấp",
+        categoryId: "cat-1",
+        requesterId: "u-1",
+        requesterName: "Nguyễn Văn An",
+        requesterAvatarUrl: null,
+        status: "APPROVED",
+        address: "Xã Tân Hóa, Huyện Minh Hóa, Tỉnh Quảng Bình",
+        latitude: 17.76,
+        longitude: 105.99,
+        assignedSupportLocationId: "loc-2",
+        assignedSupportLocationName: "Trạm điều phối Miền Trung - Đà Nẵng",
+        reviewedBy: "admin-1",
+        reviewedAt: "2026-10-21T08:30:00Z",
+        rejectionReason: null,
+        createdAt: "2026-10-20T09:00:00Z",
+        updatedAt: "2026-10-21T08:30:00Z",
+    },
+    {
+        id: "req-2",
+        title: "Hỗ trợ áo ấm và sách vở cho học sinh điểm trường Mèo Vạc",
+        description:
+            "Mùa đông vùng cao đang đến gần, điểm trường tiểu học Mèo Vạc có 120 em học sinh thiếu áo ấm và đồ dùng học tập. Kêu gọi các tấm lòng hảo tâm quyên góp áo ấm mùa đông, chăn bông và sách vở tiểu học.",
+        categoryName: "Giáo dục vùng cao",
+        categoryId: "cat-4",
+        requesterId: "u-2",
+        requesterName: "Trần Thị Mai",
+        requesterAvatarUrl: null,
+        status: "IN_PROGRESS",
+        address: "Xã Pả Vi, Huyện Mèo Vạc, Tỉnh Hà Giang",
+        latitude: 23.16,
+        longitude: 105.41,
+        assignedSupportLocationId: "loc-1",
+        assignedSupportLocationName: "Điểm tiếp nhận Hà Nội - Cầu Giấy",
+        reviewedBy: "admin-1",
+        reviewedAt: "2026-10-22T10:00:00Z",
+        rejectionReason: null,
+        createdAt: "2026-10-21T10:30:00Z",
+        updatedAt: "2026-10-22T10:00:00Z",
+    },
+    {
+        id: "req-3",
+        title: "Thuốc men y tế sơ cấp cứu cho bà con vùng ngập sâu Lệ Thủy",
+        description:
+            "Khu vực huyện Lệ Thủy đang ngập sâu, nhiều người già và trẻ em bị mắc các bệnh da liễu, cảm cúm và tiêu hóa do tiếp xúc nguồn nước bẩn. Cần gấp túi sơ cứu gia đình và thuốc men cơ bản.",
+        categoryName: "Y tế & Thuốc men",
+        categoryId: "cat-3",
+        requesterId: "u-3",
+        requesterName: "Lê Hoàng Long",
+        requesterAvatarUrl: null,
+        status: "PENDING",
+        address: "Huyện Lệ Thủy, Tỉnh Quảng Bình",
+        latitude: 17.21,
+        longitude: 106.78,
+        assignedSupportLocationId: null,
+        assignedSupportLocationName: null,
+        reviewedBy: null,
+        reviewedAt: null,
+        rejectionReason: null,
+        createdAt: "2026-10-23T14:15:00Z",
+        updatedAt: "2026-10-23T14:15:00Z",
+    },
+    {
+        id: "req-4",
+        title: "Cung cấp gạo và mì gói hỗ trợ các hộ gia đình neo đơn",
+        description:
+            "Chương trình cung cấp 500 suất quà nhu yếu phẩm thiết yếu cho các cụ già neo đơn và gia đình có hoàn cảnh đặc biệt khó khăn tại vùng bão lũ.",
+        categoryName: "Lương thực & Nhu yếu phẩm",
+        categoryId: "cat-2",
+        requesterId: "u-4",
+        requesterName: "Phạm Minh Đức",
+        requesterAvatarUrl: null,
+        status: "COMPLETED",
+        address: "Thị xã Ba Đồn, Tỉnh Quảng Bình",
+        latitude: 17.75,
+        longitude: 106.42,
+        assignedSupportLocationId: "loc-2",
+        assignedSupportLocationName: "Trạm điều phối Miền Trung - Đà Nẵng",
+        reviewedBy: "admin-1",
+        reviewedAt: "2026-10-16T08:00:00Z",
+        rejectionReason: null,
+        createdAt: "2026-10-15T08:00:00Z",
+        updatedAt: "2026-10-19T17:00:00Z",
+    },
+];
+
+const MOCK_SUPPORT_NEEDS: SupportNeed[] = [
+    {
+        id: "need-1",
+        supportRequestId: "req-1",
+        supportRequestTitle: "Cứu trợ lương thực và nước sạch sau bão lũ tại Quảng Bình",
+        supportType: "GOODS",
+        needName: "Gạo tẻ (bao 25kg)",
+        unit: "PACKAGE",
+        requiredQuantity: 100,
+        receivedQuantity: 65,
+        remainingQuantity: 35,
+        isFulfilled: false,
+        createdAt: "2026-10-20T09:00:00Z",
+        updatedAt: "2026-10-21T11:00:00Z",
+    },
+    {
+        id: "need-2",
+        supportRequestId: "req-1",
+        supportRequestTitle: "Cứu trợ lương thực và nước sạch sau bão lũ tại Quảng Bình",
+        supportType: "GOODS",
+        needName: "Nước khoáng sạch (thùng 24 chai)",
+        unit: "BOX",
+        requiredQuantity: 200,
+        receivedQuantity: 200,
+        remainingQuantity: 0,
+        isFulfilled: true,
+        createdAt: "2026-10-20T09:00:00Z",
+        updatedAt: "2026-10-22T16:00:00Z",
+    },
+    {
+        id: "need-3",
+        supportRequestId: "req-1",
+        supportRequestTitle: "Cứu trợ lương thực và nước sạch sau bão lũ tại Quảng Bình",
+        supportType: "MONEY",
+        needName: "Kinh phí sửa chữa mái nhà bị tốc mái",
+        unit: "VND",
+        requiredQuantity: 50000000,
+        receivedQuantity: 32000000,
+        remainingQuantity: 18000000,
+        isFulfilled: false,
+        createdAt: "2026-10-20T09:00:00Z",
+        updatedAt: "2026-10-22T18:00:00Z",
+    },
+];
+
+const MOCK_VOLUNTEER_ASSIGNMENTS: VolunteerAssignment[] = [
+    {
+        supportRequestId: "req-1",
+        supportRequestTitle: "Cứu trợ lương thực và nước sạch sau bão lũ tại Quảng Bình",
+        supportRequestStatus: "APPROVED",
+        requesterId: "u-1",
+        requesterName: "Nguyễn Văn An",
+        volunteerId: "vol-demo",
+        volunteerName: "Tình nguyện viên HelpHub",
+        volunteerEmail: "volunteer@helphub.local",
+        volunteerPhone: "0988776655",
+        status: "ACCEPTED",
+        reviewedBy: "admin-1",
+        reviewedByName: "HelpHub Admin",
+        reviewedAt: "2026-10-21T09:00:00Z",
+        rejectionReason: null,
+        assignedAt: "2026-10-21T09:00:00Z",
+        updatedAt: "2026-10-21T09:00:00Z",
+    },
+    {
+        supportRequestId: "req-2",
+        supportRequestTitle: "Hỗ trợ áo ấm và sách vở cho học sinh điểm trường Mèo Vạc",
+        supportRequestStatus: "IN_PROGRESS",
+        requesterId: "u-2",
+        requesterName: "Trần Thị Mai",
+        volunteerId: "vol-demo",
+        volunteerName: "Tình nguyện viên HelpHub",
+        volunteerEmail: "volunteer@helphub.local",
+        volunteerPhone: "0988776655",
+        status: "ACCEPTED",
+        reviewedBy: "admin-1",
+        reviewedByName: "HelpHub Admin",
+        reviewedAt: "2026-10-22T11:00:00Z",
+        rejectionReason: null,
+        assignedAt: "2026-10-22T11:00:00Z",
+        updatedAt: "2026-10-22T11:00:00Z",
+    },
+];
+
+export async function getCategories(accessToken: string): Promise<CategorySummary[]> {
+    // [BE PENDING]: return apiData<CategorySummary[]>("/api/v1/categories?activeOnly=true", { method: "GET" }, accessToken);
+    return MOCK_CATEGORIES;
 }
 
-export function getSupportLocations(
+export async function getSupportLocations(
     accessToken: string,
 ): Promise<SupportLocationSummary[]> {
-    return apiData<SupportLocationSummary[]>(
-        "/api/v1/support-locations?activeOnly=true",
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportLocationSummary[]>("/api/v1/support-locations?activeOnly=true", { method: "GET" }, accessToken);
+    return MOCK_LOCATIONS;
 }
 
-export function getSupportRequests(
+export async function getSupportRequests(
     accessToken: string,
     status?: SupportRequestStatus,
 ): Promise<SupportRequestSummary[]> {
-    const query = status ? `?status=${encodeURIComponent(status)}` : "";
-    return apiData<SupportRequestSummary[]>(
-        `/api/v1/support-requests${query}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: const query = status ? `?status=${encodeURIComponent(status)}` : "";
+    // [BE PENDING]: return apiData<SupportRequestSummary[]>(`/api/v1/support-requests${query}`, { method: "GET" }, accessToken);
+    if (!status) return MOCK_SUPPORT_REQUESTS;
+    return MOCK_SUPPORT_REQUESTS.filter((req) => req.status === status);
 }
 
-export function getMySupportRequests(
+export async function getMySupportRequests(
     accessToken: string,
 ): Promise<SupportRequestSummary[]> {
-    return apiData<SupportRequestSummary[]>(
-        "/api/v1/support-requests/my-requests",
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportRequestSummary[]>("/api/v1/support-requests/my-requests", { method: "GET" }, accessToken);
+    return MOCK_SUPPORT_REQUESTS.slice(0, 2);
 }
 
-export function getSupportRequest(
+export async function getSupportRequest(
     accessToken: string,
     id: string,
 ): Promise<SupportRequestDetail> {
-    return apiData<SupportRequestDetail>(
-        `/api/v1/support-requests/${encodeURIComponent(id)}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportRequestDetail>(`/api/v1/support-requests/${encodeURIComponent(id)}`, { method: "GET" }, accessToken);
+    const found = MOCK_SUPPORT_REQUESTS.find((req) => req.id === id);
+    if (found) return found;
+    return {
+        ...MOCK_SUPPORT_REQUESTS[0],
+        id,
+    };
 }
 
-export function createSupportRequest(
+export async function createSupportRequest(
     accessToken: string,
     payload: SupportRequestPayload,
 ): Promise<SupportRequestDetail> {
-    return apiData<SupportRequestDetail>(
-        "/api/v1/support-requests",
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportRequestDetail>("/api/v1/support-requests", { method: "POST", body: JSON.stringify(payload) }, accessToken);
+    const category = MOCK_CATEGORIES.find((c) => c.id === payload.categoryId) || MOCK_CATEGORIES[0];
+    const newReq: SupportRequestDetail = {
+        id: "req-" + Date.now(),
+        title: payload.title,
+        description: payload.description,
+        categoryId: payload.categoryId,
+        categoryName: category.name,
+        requesterId: "me",
+        requesterName: "Bạn",
+        requesterAvatarUrl: null,
+        status: "PENDING",
+        address: payload.address ?? null,
+        latitude: payload.latitude ?? null,
+        longitude: payload.longitude ?? null,
+        assignedSupportLocationId: null,
+        assignedSupportLocationName: null,
+        reviewedBy: null,
+        reviewedAt: null,
+        rejectionReason: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+    MOCK_SUPPORT_REQUESTS.unshift(newReq);
+    return newReq;
 }
 
-export function updateSupportRequest(
+export async function updateSupportRequest(
     accessToken: string,
     id: string,
     payload: SupportRequestPayload,
 ): Promise<SupportRequestDetail> {
-    return apiData<SupportRequestDetail>(
-        `/api/v1/support-requests/${encodeURIComponent(id)}`,
-        {
-            method: "PUT",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportRequestDetail>(`/api/v1/support-requests/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(payload) }, accessToken);
+    const existing = await getSupportRequest(accessToken, id);
+    return {
+        ...existing,
+        title: payload.title,
+        description: payload.description,
+        address: payload.address ?? existing.address,
+        updatedAt: new Date().toISOString(),
+    };
 }
 
-export function approveSupportRequest(
+export async function approveSupportRequest(
     accessToken: string,
     id: string,
 ): Promise<SupportRequestDetail> {
-    return apiData<SupportRequestDetail>(
-        `/api/v1/support-requests/${encodeURIComponent(id)}/approve`,
-        { method: "PATCH" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportRequestDetail>(`/api/v1/support-requests/${encodeURIComponent(id)}/approve`, { method: "PATCH" }, accessToken);
+    const existing = await getSupportRequest(accessToken, id);
+    existing.status = "APPROVED";
+    return existing;
 }
 
-export function rejectSupportRequest(
+export async function rejectSupportRequest(
     accessToken: string,
     id: string,
     rejectionReason: string,
 ): Promise<SupportRequestDetail> {
-    return apiData<SupportRequestDetail>(
-        `/api/v1/support-requests/${encodeURIComponent(id)}/reject`,
-        {
-            method: "PATCH",
-            body: JSON.stringify({ rejectionReason }),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportRequestDetail>(`/api/v1/support-requests/${encodeURIComponent(id)}/reject`, { method: "PATCH", body: JSON.stringify({ rejectionReason }) }, accessToken);
+    const existing = await getSupportRequest(accessToken, id);
+    existing.status = "REJECTED";
+    existing.rejectionReason = rejectionReason;
+    return existing;
 }
 
-export function assignSupportLocation(
+export async function assignSupportLocation(
     accessToken: string,
     id: string,
     supportLocationId: string,
 ): Promise<SupportRequestDetail> {
-    return apiData<SupportRequestDetail>(
-        `/api/v1/support-requests/${encodeURIComponent(id)}/assign-support-location`,
-        {
-            method: "PATCH",
-            body: JSON.stringify({ supportLocationId }),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportRequestDetail>(`/api/v1/support-requests/${encodeURIComponent(id)}/assign-support-location`, { method: "PATCH", body: JSON.stringify({ supportLocationId }) }, accessToken);
+    const existing = await getSupportRequest(accessToken, id);
+    const location = MOCK_LOCATIONS.find((l) => l.id === supportLocationId);
+    existing.assignedSupportLocationId = supportLocationId;
+    existing.assignedSupportLocationName = location ? location.name : null;
+    return existing;
 }
 
-export function getSupportNeeds(
+export async function getSupportNeeds(
     accessToken: string,
     supportRequestId: string,
 ): Promise<SupportNeed[]> {
-    return apiData<SupportNeed[]>(
-        `/api/v1/support-requests/${encodeURIComponent(supportRequestId)}/needs`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportNeed[]>(`/api/v1/support-requests/${encodeURIComponent(supportRequestId)}/needs`, { method: "GET" }, accessToken);
+    return MOCK_SUPPORT_NEEDS.map((n) => ({ ...n, supportRequestId }));
 }
 
-export function createSupportNeed(
+export async function createSupportNeed(
     accessToken: string,
     supportRequestId: string,
     payload: SupportNeedPayload,
 ): Promise<SupportNeed> {
-    return apiData<SupportNeed>(
-        `/api/v1/support-requests/${encodeURIComponent(supportRequestId)}/needs`,
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportNeed>(`/api/v1/support-requests/${encodeURIComponent(supportRequestId)}/needs`, { method: "POST", body: JSON.stringify(payload) }, accessToken);
+    const newNeed: SupportNeed = {
+        id: "need-" + Date.now(),
+        supportRequestId,
+        supportRequestTitle: "Yêu cầu cứu trợ",
+        supportType: payload.supportType,
+        needName: payload.needName,
+        unit: payload.unit,
+        requiredQuantity: payload.requiredQuantity,
+        receivedQuantity: 0,
+        remainingQuantity: payload.requiredQuantity,
+        isFulfilled: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+    MOCK_SUPPORT_NEEDS.push(newNeed);
+    return newNeed;
 }
 
-export function updateSupportNeed(
+export async function updateSupportNeed(
     accessToken: string,
     needId: string,
     payload: SupportNeedPayload,
 ): Promise<SupportNeed> {
-    return apiData<SupportNeed>(
-        `/api/v1/support-needs/${encodeURIComponent(needId)}`,
-        {
-            method: "PUT",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportNeed>(`/api/v1/support-needs/${encodeURIComponent(needId)}`, { method: "PUT", body: JSON.stringify(payload) }, accessToken);
+    return {
+        id: needId,
+        supportRequestId: "req-1",
+        supportRequestTitle: "Yêu cầu cứu trợ",
+        supportType: payload.supportType,
+        needName: payload.needName,
+        unit: payload.unit,
+        requiredQuantity: payload.requiredQuantity,
+        receivedQuantity: 0,
+        remainingQuantity: payload.requiredQuantity,
+        isFulfilled: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
 }
 
 export async function deleteSupportNeed(
     accessToken: string,
     needId: string,
 ): Promise<void> {
-    await apiData<null>(
-        `/api/v1/support-needs/${encodeURIComponent(needId)}`,
-        { method: "DELETE" },
-        accessToken,
-    );
+    // [BE PENDING]: await apiData<null>(`/api/v1/support-needs/${encodeURIComponent(needId)}`, { method: "DELETE" }, accessToken);
+    return Promise.resolve();
 }
 
-export function getSupportNeedContributions(
+export async function getSupportNeedContributions(
     accessToken: string,
     needId: string,
 ): Promise<SupportNeedContribution[]> {
-    return apiData<SupportNeedContribution[]>(
-        `/api/v1/support-needs/${encodeURIComponent(needId)}/contributions`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportNeedContribution[]>(`/api/v1/support-needs/${encodeURIComponent(needId)}/contributions`, { method: "GET" }, accessToken);
+    return [
+        {
+            id: "contrib-1",
+            supportNeedId: needId,
+            needName: "Gạo tẻ",
+            contributorId: "u-contributor",
+            contributorName: "Đoàn thiện nguyện Hà Nội",
+            quantity: 50,
+            note: "Ủng hộ đồng bào bão lũ",
+            createdAt: "2026-10-22T10:00:00Z",
+        },
+    ];
 }
 
-export function contributeToSupportNeed(
+export async function contributeToSupportNeed(
     accessToken: string,
     needId: string,
     quantity: number,
     note?: string,
 ): Promise<SupportNeedContribution> {
-    return apiData<SupportNeedContribution>(
-        `/api/v1/support-needs/${encodeURIComponent(needId)}/contributions`,
-        {
-            method: "POST",
-            body: JSON.stringify({ quantity, note: note || undefined }),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<SupportNeedContribution>(`/api/v1/support-needs/${encodeURIComponent(needId)}/contributions`, { method: "POST", body: JSON.stringify({ quantity, note: note || undefined }) }, accessToken);
+    return {
+        id: "contrib-" + Date.now(),
+        supportNeedId: needId,
+        needName: "Quyên góp",
+        contributorId: "me",
+        contributorName: "Bạn",
+        quantity,
+        note: note ?? null,
+        createdAt: new Date().toISOString(),
+    };
 }
 
-export function applyToSupportRequest(
+export async function applyToSupportRequest(
     accessToken: string,
     supportRequestId: string,
 ): Promise<VolunteerAssignment> {
-    return apiData<VolunteerAssignment>(
-        `/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/apply`,
-        { method: "POST" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<VolunteerAssignment>(`/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/apply`, { method: "POST" }, accessToken);
+    return {
+        supportRequestId,
+        supportRequestTitle: "Yêu cầu cứu trợ",
+        supportRequestStatus: "APPROVED",
+        requesterId: "u-1",
+        requesterName: "Nguyễn Văn An",
+        volunteerId: "me",
+        volunteerName: "Bạn",
+        volunteerEmail: "user@helphub.local",
+        volunteerPhone: "0900000000",
+        status: "PENDING",
+        reviewedBy: null,
+        reviewedByName: null,
+        reviewedAt: null,
+        rejectionReason: null,
+        assignedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
 }
 
-export function getMyVolunteerAssignments(
+export async function getMyVolunteerAssignments(
     accessToken: string,
 ): Promise<VolunteerAssignment[]> {
-    return apiData<VolunteerAssignment[]>(
-        "/api/v1/volunteer-assignments/my-assignments",
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<VolunteerAssignment[]>("/api/v1/volunteer-assignments/my-assignments", { method: "GET" }, accessToken);
+    return MOCK_VOLUNTEER_ASSIGNMENTS;
 }
 
-export function getVolunteerAssignments(
+export async function getVolunteerAssignments(
     accessToken: string,
     supportRequestId: string,
 ): Promise<VolunteerAssignment[]> {
-    return apiData<VolunteerAssignment[]>(
-        `/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}`,
-        { method: "GET" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<VolunteerAssignment[]>(`/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}`, { method: "GET" }, accessToken);
+    return MOCK_VOLUNTEER_ASSIGNMENTS.filter((v) => v.supportRequestId === supportRequestId);
 }
 
-export function approveVolunteerAssignment(
+export async function approveVolunteerAssignment(
     accessToken: string,
     supportRequestId: string,
     volunteerId: string,
 ): Promise<VolunteerAssignment> {
-    return apiData<VolunteerAssignment>(
-        `/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/volunteers/${encodeURIComponent(volunteerId)}/approve`,
-        { method: "PATCH" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<VolunteerAssignment>(`/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/volunteers/${encodeURIComponent(volunteerId)}/approve`, { method: "PATCH" }, accessToken);
+    return {
+        ...MOCK_VOLUNTEER_ASSIGNMENTS[0],
+        status: "ACCEPTED",
+    };
 }
 
-export function rejectVolunteerAssignment(
+export async function rejectVolunteerAssignment(
     accessToken: string,
     supportRequestId: string,
     volunteerId: string,
     rejectionReason: string,
 ): Promise<VolunteerAssignment> {
-    return apiData<VolunteerAssignment>(
-        `/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/volunteers/${encodeURIComponent(volunteerId)}/reject`,
-        {
-            method: "PATCH",
-            body: JSON.stringify({ rejectionReason }),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<VolunteerAssignment>(`/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/volunteers/${encodeURIComponent(volunteerId)}/reject`, { method: "PATCH", body: JSON.stringify({ rejectionReason }) }, accessToken);
+    return {
+        ...MOCK_VOLUNTEER_ASSIGNMENTS[0],
+        status: "REJECTED",
+        rejectionReason,
+    };
 }
 
-export function cancelVolunteerAssignment(
+export async function cancelVolunteerAssignment(
     accessToken: string,
     supportRequestId: string,
 ): Promise<VolunteerAssignment> {
-    return apiData<VolunteerAssignment>(
-        `/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/cancel`,
-        { method: "PATCH" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<VolunteerAssignment>(`/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/cancel`, { method: "PATCH" }, accessToken);
+    return {
+        ...MOCK_VOLUNTEER_ASSIGNMENTS[0],
+        status: "CANCELLED",
+    };
 }
 
-export function completeVolunteerAssignment(
+export async function completeVolunteerAssignment(
     accessToken: string,
     supportRequestId: string,
 ): Promise<VolunteerAssignment> {
-    return apiData<VolunteerAssignment>(
-        `/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/complete`,
-        { method: "PATCH" },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<VolunteerAssignment>(`/api/v1/volunteer-assignments/support-requests/${encodeURIComponent(supportRequestId)}/complete`, { method: "PATCH" }, accessToken);
+    return {
+        ...MOCK_VOLUNTEER_ASSIGNMENTS[0],
+        status: "COMPLETED",
+    };
 }
 
-export function createReport(
+export async function createReport(
     accessToken: string,
     payload: CreateReportPayload,
 ): Promise<unknown> {
-    return apiData<unknown>(
-        "/api/reports",
-        {
-            method: "POST",
-            body: JSON.stringify(payload),
-        },
-        accessToken,
-    );
+    // [BE PENDING]: return apiData<unknown>("/api/reports", { method: "POST", body: JSON.stringify(payload) }, accessToken);
+    return { success: true, message: "Báo cáo của bạn đã được ghi nhận." };
 }

@@ -95,6 +95,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
 
         let client: Client;
         const connectWebSocket = async () => {
+            if (process.env.NEXT_PUBLIC_ENABLE_WS !== "true") return;
             const token = await getAccessToken();
             const wsUrl =
                 process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8081/ws";
