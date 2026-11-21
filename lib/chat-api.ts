@@ -71,131 +71,11 @@ export interface UserSearchResponse {
 }
 
 // ============================================================================
-// MOCK DATA: Dữ liệu mẫu tin nhắn & hội thoại (Chat)
+// DỮ LIỆU ĐỒNG BỘ: Tin nhắn hội thoại thật, khởi tạo sạch không dùng dữ liệu giả
 // ============================================================================
 
-const MOCK_CONVERSATIONS: ConversationSummaryResponse[] = [
-    {
-        id: "conv-1",
-        name: "Nhóm cứu trợ bão lũ Quảng Bình",
-        avatarUrl: null,
-        type: "GROUP",
-        members: [
-            {
-                userId: "u-1",
-                fullName: "Nguyễn Văn An",
-                email: "an@helphub.local",
-                avatarUrl: null,
-                joinedAt: "2026-10-20T00:00:00Z",
-            },
-            {
-                userId: "u-admin",
-                fullName: "HelpHub Admin",
-                email: "admin@helphub.local",
-                avatarUrl: null,
-                joinedAt: "2026-10-20T00:00:00Z",
-            },
-        ],
-        lastMessage: {
-            id: "msg-1",
-            conversationId: "conv-1",
-            senderId: "u-1",
-            senderName: "Nguyễn Văn An",
-            senderAvatarUrl: null,
-            content: "Xe chở 500 thùng nước sạch đã tới trụ sở xã Tân Hóa an toàn rồi nhé cả nhóm!",
-            media: [],
-            createdAt: "2026-10-24T10:15:00Z",
-            updatedAt: "2026-10-24T10:15:00Z",
-            editedAt: null,
-        },
-        unreadCount: 1,
-        updatedAt: "2026-10-24T10:15:00Z",
-    },
-    {
-        id: "conv-2",
-        name: "Trần Thị Mai (Tình nguyện viên)",
-        avatarUrl: null,
-        type: "PRIVATE",
-        members: [
-            {
-                userId: "u-2",
-                fullName: "Trần Thị Mai",
-                email: "mai@helphub.local",
-                avatarUrl: null,
-                joinedAt: "2026-10-21T00:00:00Z",
-            },
-        ],
-        lastMessage: {
-            id: "msg-2",
-            conversationId: "conv-2",
-            senderId: "u-2",
-            senderName: "Trần Thị Mai",
-            senderAvatarUrl: null,
-            content: "Chào bạn, mình đã tổng hợp xong danh sách các em học sinh nhận áo ấm tại Mèo Vạc rồi nhé.",
-            media: [],
-            createdAt: "2026-10-23T15:30:00Z",
-            updatedAt: "2026-10-23T15:30:00Z",
-            editedAt: null,
-        },
-        unreadCount: 0,
-        updatedAt: "2026-10-23T15:30:00Z",
-    },
-];
-
-const MOCK_MESSAGES: Record<string, MessageResponse[]> = {
-    "conv-1": [
-        {
-            id: "m-1",
-            conversationId: "conv-1",
-            senderId: "u-admin",
-            senderName: "HelpHub Admin",
-            senderAvatarUrl: null,
-            content: "Chào cả nhóm, tình hình vận chuyển hàng vào Tân Hóa hôm nay thế nào rồi An ơi?",
-            media: [],
-            createdAt: "2026-10-24T09:30:00Z",
-            updatedAt: "2026-10-24T09:30:00Z",
-            editedAt: null,
-        },
-        {
-            id: "m-2",
-            conversationId: "conv-1",
-            senderId: "u-1",
-            senderName: "Nguyễn Văn An",
-            senderAvatarUrl: null,
-            content: "Dạ đường vào thôn 3 đã bớt ngập, cano cứu hộ đang tiếp tục trung chuyển hàng vào các hộ dân bị cô lập ạ.",
-            media: [],
-            createdAt: "2026-10-24T09:45:00Z",
-            updatedAt: "2026-10-24T09:45:00Z",
-            editedAt: null,
-        },
-        {
-            id: "msg-1",
-            conversationId: "conv-1",
-            senderId: "u-1",
-            senderName: "Nguyễn Văn An",
-            senderAvatarUrl: null,
-            content: "Xe chở 500 thùng nước sạch đã tới trụ sở xã Tân Hóa an toàn rồi nhé cả nhóm!",
-            media: [],
-            createdAt: "2026-10-24T10:15:00Z",
-            updatedAt: "2026-10-24T10:15:00Z",
-            editedAt: null,
-        },
-    ],
-    "conv-2": [
-        {
-            id: "msg-2",
-            conversationId: "conv-2",
-            senderId: "u-2",
-            senderName: "Trần Thị Mai",
-            senderAvatarUrl: null,
-            content: "Chào bạn, mình đã tổng hợp xong danh sách các em học sinh nhận áo ấm tại Mèo Vạc rồi nhé.",
-            media: [],
-            createdAt: "2026-10-23T15:30:00Z",
-            updatedAt: "2026-10-23T15:30:00Z",
-            editedAt: null,
-        },
-    ],
-};
+const MOCK_CONVERSATIONS: ConversationSummaryResponse[] = [];
+const MOCK_MESSAGES: Record<string, MessageResponse[]> = {};
 
 export async function getMyConversations(
     accessToken: string,
@@ -238,20 +118,7 @@ export async function getConversationMessages(
     conversationId: string,
 ): Promise<MessageResponse[]> {
     // [BE PENDING]: return apiData<MessageResponse[]>(`/api/v1/conversations/${encodeURIComponent(conversationId)}/messages`, { method: "GET" }, accessToken);
-    return MOCK_MESSAGES[conversationId] || [
-        {
-            id: "demo-m",
-            conversationId,
-            senderId: "other",
-            senderName: "Tình nguyện viên",
-            senderAvatarUrl: null,
-            content: "Xin chào! Bạn cần hỗ trợ thêm thông tin gì về đợt cứu trợ này không ạ?",
-            media: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            editedAt: null,
-        },
-    ];
+    return MOCK_MESSAGES[conversationId] || [];
 }
 
 export async function sendMessage(
@@ -313,26 +180,7 @@ export async function createMediaRecord(
     return { id: "mock-media-" + Date.now() };
 }
 
-const MOCK_CHAT_USERS: UserSearchResponse[] = [
-    {
-        id: "u-1",
-        fullName: "Nguyễn Văn An",
-        email: "nguyenvanan@gmail.com",
-        avatarUrl: null,
-    },
-    {
-        id: "u-2",
-        fullName: "CLB Áo Ấm Vùng Cao",
-        email: "aoamvungcao@helphub.org",
-        avatarUrl: null,
-    },
-    {
-        id: "u-3",
-        fullName: "Trần Thị Mai",
-        email: "maitran@gmail.com",
-        avatarUrl: null,
-    },
-];
+const MOCK_CHAT_USERS: UserSearchResponse[] = [];
 
 export async function searchUsers(
     accessToken: string,

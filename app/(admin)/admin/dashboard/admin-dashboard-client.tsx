@@ -46,18 +46,18 @@ const COLORS = [
 ];
 
 const REQUEST_STATUS_COLORS: Record<string, string> = {
-    Pending: "#f59e0b",
-    Approved: "#10b981",
-    "In progress": "#3b82f6",
-    Completed: "#64748b",
-    Rejected: "#f43f5e",
-    Cancelled: "#94a3b8",
+    "Chờ phê duyệt": "#f59e0b",
+    "Đã phê duyệt": "#10b981",
+    "Đang thực hiện": "#3b82f6",
+    "Đã hoàn thành": "#64748b",
+    "Đã từ chối": "#f43f5e",
+    "Đã hủy": "#94a3b8",
 };
 
 const REPORT_STATUS_COLORS: Record<string, string> = {
-    Pending: "#f59e0b",
-    Reviewed: "#3b82f6",
-    Resolved: "#10b981",
+    "Chờ xử lý": "#f59e0b",
+    "Đã xem xét": "#3b82f6",
+    "Đã giải quyết": "#10b981",
 };
 
 export function AdminDashboardClient() {
@@ -112,20 +112,20 @@ export function AdminDashboardClient() {
         () =>
             userStats
                 ? [
-                      {
-                          name: "Requesters",
-                          value: userStats.requesters,
-                      },
-                      {
-                          name: "Volunteers",
-                          value: userStats.volunteers,
-                      },
-                      {
-                          name: "Collaborators",
-                          value: userStats.collaborators,
-                      },
-                      { name: "Admins", value: userStats.admins },
-                  ]
+                    {
+                        name: "Người cần hỗ trợ",
+                        value: userStats.requesters,
+                    },
+                    {
+                        name: "Tình nguyện viên",
+                        value: userStats.volunteers,
+                    },
+                    {
+                        name: "Điều phối viên",
+                        value: userStats.collaborators,
+                    },
+                    { name: "Quản trị viên", value: userStats.admins },
+                ]
                 : [],
         [userStats],
     );
@@ -134,19 +134,19 @@ export function AdminDashboardClient() {
         () =>
             requestStats
                 ? [
-                      { name: "Pending", value: requestStats.pending },
-                      { name: "Approved", value: requestStats.approved },
-                      {
-                          name: "In progress",
-                          value: requestStats.inProgress,
-                      },
-                      { name: "Completed", value: requestStats.completed },
-                      { name: "Rejected", value: requestStats.rejected },
-                      { name: "Cancelled", value: requestStats.cancelled },
-                  ].map((item) => ({
-                      ...item,
-                      color: REQUEST_STATUS_COLORS[item.name],
-                  }))
+                    { name: "Chờ phê duyệt", value: requestStats.pending },
+                    { name: "Đã phê duyệt", value: requestStats.approved },
+                    {
+                        name: "Đang thực hiện",
+                        value: requestStats.inProgress,
+                    },
+                    { name: "Đã hoàn thành", value: requestStats.completed },
+                    { name: "Đã từ chối", value: requestStats.rejected },
+                    { name: "Đã hủy", value: requestStats.cancelled },
+                ].map((item) => ({
+                    ...item,
+                    color: REQUEST_STATUS_COLORS[item.name],
+                }))
                 : [],
         [requestStats],
     );
@@ -164,11 +164,11 @@ export function AdminDashboardClient() {
         () =>
             postStats
                 ? [
-                      { name: "Active", value: postStats.active },
-                      { name: "Under review", value: postStats.underReview },
-                      { name: "Hidden", value: postStats.hidden },
-                      { name: "Removed", value: postStats.removed },
-                  ]
+                    { name: "Hoạt động", value: postStats.active },
+                    { name: "Đang kiểm duyệt", value: postStats.underReview },
+                    { name: "Đã ẩn", value: postStats.hidden },
+                    { name: "Đã gỡ bỏ", value: postStats.removed },
+                ]
                 : [],
         [postStats],
     );
@@ -177,22 +177,22 @@ export function AdminDashboardClient() {
         () =>
             reportStats
                 ? [
-                      {
-                          name: "Pending",
-                          value: reportStats.pending,
-                          color: REPORT_STATUS_COLORS.Pending,
-                      },
-                      {
-                          name: "Reviewed",
-                          value: reportStats.reviewed,
-                          color: REPORT_STATUS_COLORS.Reviewed,
-                      },
-                      {
-                          name: "Resolved",
-                          value: reportStats.resolved,
-                          color: REPORT_STATUS_COLORS.Resolved,
-                      },
-                  ]
+                    {
+                        name: "Chờ xử lý",
+                        value: reportStats.pending,
+                        color: REPORT_STATUS_COLORS["Chờ xử lý"],
+                    },
+                    {
+                        name: "Đã xem xét",
+                        value: reportStats.reviewed,
+                        color: REPORT_STATUS_COLORS["Đã xem xét"],
+                    },
+                    {
+                        name: "Đã giải quyết",
+                        value: reportStats.resolved,
+                        color: REPORT_STATUS_COLORS["Đã giải quyết"],
+                    },
+                ]
                 : [],
         [reportStats],
     );
@@ -201,35 +201,35 @@ export function AdminDashboardClient() {
         () =>
             reportStats
                 ? [
-                      {
-                          name: "Support requests",
-                          value: reportStats.supportRequestReports,
-                      },
-                      { name: "Posts", value: reportStats.postReports },
-                      { name: "Users", value: reportStats.userReports },
-                  ]
+                    {
+                        name: "Yêu cầu hỗ trợ",
+                        value: reportStats.supportRequestReports,
+                    },
+                    { name: "Bài viết", value: reportStats.postReports },
+                    { name: "Người dùng", value: reportStats.userReports },
+                ]
                 : [],
         [reportStats],
     );
 
     if (loading) {
-        return <LoadingBlock message="Loading admin dashboard..." />;
+        return <LoadingBlock message="Đang tải dữ liệu quản trị..." />;
     }
 
     return (
         <div className="space-y-6 pb-10">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <PageHeading
-                    eyebrow="System Overview"
-                    title="Admin Dashboard"
-                    description="Live metrics from the HelpHub backend."
+                    eyebrow="Tổng quan hệ thống"
+                    title="Bảng điều khiển quản trị"
+                    description="Thống kê trực quan số liệu thời gian thực từ hệ thống HelpHub."
                 />
                 <button
                     type="button"
                     onClick={() => void loadDashboard()}
-                    className="h-10 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="h-10 rounded-2xl border-2 border-slate-200 bg-white px-4 text-xs font-black text-slate-700 shadow-[0_2px_0_0_#cbd5e1] hover:bg-slate-50 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
                 >
-                    Refresh
+                    Làm mới
                 </button>
             </div>
 
@@ -241,7 +241,7 @@ export function AdminDashboardClient() {
                         onClick={() => void loadDashboard()}
                         className="font-semibold underline"
                     >
-                        Try again
+                        Thử lại
                     </button>
                 </Notice>
             ) : null}
@@ -250,38 +250,38 @@ export function AdminDashboardClient() {
                 <>
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                         <KpiCard
-                            title="Users"
+                            title="Người dùng"
                             value={userStats.totalUsers}
-                            detail={`${userStats.activeUsers} active`}
+                            detail={`${userStats.activeUsers} đang hoạt động`}
                         />
                         <KpiCard
-                            title="Support requests"
+                            title="Yêu cầu hỗ trợ"
                             value={requestStats.totalSupportRequests}
-                            detail={`${requestStats.pending} pending review`}
+                            detail={`${requestStats.pending} chờ phê duyệt`}
                         />
                         <KpiCard
-                            title="Categories"
+                            title="Danh mục hỗ trợ"
                             value={categoryStats.totalCategories}
-                            detail={`${categoryStats.activeCategories} active`}
+                            detail={`${categoryStats.activeCategories} đang sử dụng`}
                         />
                         <KpiCard
-                            title="Posts"
+                            title="Bài viết"
                             value={postStats.totalPosts}
-                            detail={`${postStats.underReview} under review`}
+                            detail={`${postStats.underReview} đang kiểm duyệt`}
                         />
                         <KpiCard
-                            title="Reports"
+                            title="Báo cáo vi phạm"
                             value={reportStats.totalReports}
-                            detail={`${reportStats.pending} pending`}
+                            detail={`${reportStats.pending} chờ xử lý`}
                         />
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-                        <StatCard title="System Users">
+                        <StatCard title="Tài khoản người dùng">
                             <div className="mt-2 flex items-center justify-between gap-4">
                                 <div>
-                                    <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                                        Total accounts
+                                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                        Tổng số tài khoản
                                     </p>
                                     <span className="text-4xl font-black text-slate-800">
                                         {userStats.totalUsers}
@@ -289,10 +289,10 @@ export function AdminDashboardClient() {
                                 </div>
                                 <div className="space-y-1 text-right">
                                     <Badge tone="emerald">
-                                        Active: {userStats.activeUsers}
+                                        Hoạt động: {userStats.activeUsers}
                                     </Badge>
                                     <Badge tone="rose">
-                                        Inactive: {userStats.inactiveUsers}
+                                        Vô hiệu hóa: {userStats.inactiveUsers}
                                     </Badge>
                                 </div>
                             </div>
@@ -300,10 +300,10 @@ export function AdminDashboardClient() {
                             <PiePanel data={userRoleData} />
                         </StatCard>
 
-                        <StatCard title="Support Requests">
+                        <StatCard title="Yêu cầu hỗ trợ">
                             <div className="mt-2">
-                                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                                    Total submitted
+                                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                    Tổng yêu cầu gửi đến
                                 </p>
                                 <span className="text-4xl font-black text-slate-800">
                                     {requestStats.totalSupportRequests}
@@ -313,10 +313,10 @@ export function AdminDashboardClient() {
                             <PiePanel data={requestStatusData} />
                         </StatCard>
 
-                        <StatCard title="Reports">
+                        <StatCard title="Báo cáo vi phạm">
                             <div className="mt-2">
-                                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                                    Moderation queue
+                                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                    Hàng đợi kiểm duyệt
                                 </p>
                                 <span className="text-4xl font-black text-slate-800">
                                     {reportStats.totalReports}
@@ -328,24 +328,24 @@ export function AdminDashboardClient() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-                        <StatCard title="Requests by Category">
+                        <StatCard title="Yêu cầu theo Danh mục">
                             <BarPanel
                                 data={categoryData}
-                                emptyMessage="No support requests by category yet."
+                                emptyMessage="Chưa có dữ liệu yêu cầu theo danh mục."
                             />
                         </StatCard>
 
-                        <StatCard title="Posts by Status">
+                        <StatCard title="Bài viết theo Trạng thái">
                             <BarPanel
                                 data={postStatusData}
-                                emptyMessage="No post data yet."
+                                emptyMessage="Chưa có dữ liệu bài viết."
                             />
                         </StatCard>
 
-                        <StatCard title="Reports by Target">
+                        <StatCard title="Báo cáo theo Đối tượng">
                             <BarPanel
                                 data={reportTargetData}
-                                emptyMessage="No report target data yet."
+                                emptyMessage="Chưa có dữ liệu báo cáo."
                             />
                         </StatCard>
                     </div>
@@ -365,12 +365,12 @@ function KpiCard({
     detail: string;
 }) {
     return (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+        <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300">
+            <p className="text-xs font-black uppercase tracking-wider text-slate-400">
                 {title}
             </p>
             <p className="mt-2 text-3xl font-black text-slate-900">{value}</p>
-            <p className="mt-1 text-xs font-medium text-slate-500">{detail}</p>
+            <p className="mt-1 text-xs font-bold text-slate-500">{detail}</p>
         </div>
     );
 }
@@ -383,8 +383,8 @@ function StatCard({
     children: React.ReactNode;
 }) {
     return (
-        <section className="flex min-h-[360px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6">
-            <h3 className="border-b border-slate-100 pb-3 text-xs font-bold uppercase tracking-wider text-slate-800">
+        <section className="flex min-h-[360px] flex-col rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6">
+            <h3 className="border-b border-slate-100 pb-3 text-xs font-black uppercase tracking-wider text-slate-800">
                 {title}
             </h3>
             <div className="min-h-0 flex-1">{children}</div>
@@ -396,7 +396,7 @@ function PiePanel({ data }: { data: ChartItem[] }) {
     const visibleData = data.filter((item) => item.value > 0);
 
     if (!visibleData.length) {
-        return <EmptyChart message="No data to display yet." />;
+        return <EmptyChart message="Chưa có dữ liệu thống kê để hiển thị." />;
     }
 
     return (
@@ -488,7 +488,7 @@ function BarPanel({
 
 function EmptyChart({ message }: { message: string }) {
     return (
-        <div className="mt-6 flex h-56 items-center justify-center rounded-xl bg-slate-50 px-4 text-center text-sm text-slate-500">
+        <div className="mt-6 flex h-56 items-center justify-center rounded-2xl bg-slate-50 px-4 text-center text-sm font-medium text-slate-500 border border-slate-100">
             {message}
         </div>
     );
@@ -503,11 +503,11 @@ function Badge({
 }) {
     const className =
         tone === "emerald"
-            ? "bg-emerald-50 text-emerald-700"
-            : "bg-rose-50 text-rose-700";
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+            : "bg-rose-50 text-rose-700 border border-rose-200";
 
     return (
-        <div className={`rounded px-2 py-1 text-[11px] font-bold ${className}`}>
+        <div className={`rounded-lg px-2.5 py-1 text-[11px] font-bold ${className}`}>
             {children}
         </div>
     );
@@ -515,12 +515,13 @@ function Badge({
 
 const tooltipStyle = {
     border: "none",
-    borderRadius: "10px",
+    borderRadius: "12px",
     boxShadow: "0 8px 24px rgb(15 23 42 / 0.12)",
+    fontWeight: "bold",
 } satisfies React.CSSProperties;
 
 function getErrorMessage(error: unknown): string {
     return error instanceof Error
         ? error.message
-        : "Unable to load admin dashboard.";
+        : "Không thể tải dữ liệu bảng điều khiển quản trị.";
 }

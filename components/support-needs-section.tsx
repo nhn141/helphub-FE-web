@@ -117,7 +117,7 @@ export function SupportNeedsSection({
   async function handleDelete(need: SupportNeed) {
     if (
       !window.confirm(
-        `Delete the need "${need.needName}"? This action cannot be undone.`,
+        `Bạn có chắc muốn xóa nhu cầu "${need.needName}"? Hành động này không thể hoàn tác.`,
       )
     ) {
       return;
@@ -167,23 +167,23 @@ export function SupportNeedsSection({
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="rounded-3xl border-2 border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-950">
-            Specific support needs
+          <h2 className="text-lg font-black text-slate-950">
+            Nhu cầu hỗ trợ cụ thể
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            Track required, received, and remaining quantities.
+            Theo dõi số lượng cần thiết, đã tiếp nhận và còn thiếu.
           </p>
         </div>
         {canManage ? (
           <button
             type="button"
             onClick={startCreate}
-            className="h-10 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800"
+            className="h-10 rounded-2xl bg-emerald-600 px-4 text-xs font-black text-white shadow-[0_3px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-0.5 active:shadow-none transition-all"
           >
-            Add need
+            + Thêm nhu cầu
           </button>
         ) : null}
       </div>
@@ -197,13 +197,13 @@ export function SupportNeedsSection({
       {showNeedForm ? (
         <form
           onSubmit={handleNeedSubmit}
-          className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4"
+          className="mt-5 rounded-2xl border-2 border-emerald-100 bg-emerald-50/50 p-4"
         >
-          <h3 className="text-sm font-bold text-slate-950">
-            {editingNeedId ? "Edit need" : "Add a new need"}
+          <h3 className="text-sm font-black text-slate-950">
+            {editingNeedId ? "Chỉnh sửa nhu cầu" : "Thêm nhu cầu mới"}
           </h3>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <FormField label="Support type">
+            <FormField label="Loại hỗ trợ">
               <select
                 value={needForm.supportType}
                 onChange={(event) =>
@@ -220,11 +220,11 @@ export function SupportNeedsSection({
                 }
                 className={inputClassName}
               >
-                <option value="GOODS">Goods</option>
-                <option value="MONEY">Money</option>
+                <option value="GOODS">Nhu yếu phẩm / Hàng hóa</option>
+                <option value="MONEY">Tiền mặt / Tài chính</option>
               </select>
             </FormField>
-            <FormField label="Need name">
+            <FormField label="Tên nhu cầu">
               <input
                 required
                 maxLength={100}
@@ -232,11 +232,11 @@ export function SupportNeedsSection({
                 onChange={(event) =>
                   setNeedForm({ ...needForm, needName: event.target.value })
                 }
-                placeholder="Example: Rice, medicine, tuition..."
+                placeholder="Ví dụ: Gạo, mì tôm, thuốc hạ sốt, chi phí phẫu thuật..."
                 className={inputClassName}
               />
             </FormField>
-            <FormField label="Unit">
+            <FormField label="Đơn vị tính">
               <select
                 value={needForm.unit}
                 disabled={needForm.supportType === "MONEY"}
@@ -255,7 +255,7 @@ export function SupportNeedsSection({
                 ))}
               </select>
             </FormField>
-            <FormField label="Required quantity">
+            <FormField label="Số lượng cần hỗ trợ">
               <input
                 required
                 type="number"
@@ -276,16 +276,16 @@ export function SupportNeedsSection({
             <button
               type="button"
               onClick={() => setShowNeedForm(false)}
-              className="h-9 rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700"
+              className="h-9 rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
             >
-              Cancel
+              Hủy bỏ
             </button>
             <button
               type="submit"
               disabled={busy}
-              className="h-9 rounded-lg bg-emerald-700 px-4 text-xs font-semibold text-white disabled:bg-slate-300"
+              className="h-9 rounded-xl bg-emerald-600 px-4 text-xs font-black text-white shadow-[0_2px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-0.5 active:shadow-none transition disabled:bg-slate-300 disabled:shadow-none"
             >
-              {busy ? "Saving..." : editingNeedId ? "Save" : "Add"}
+              {busy ? "Đang lưu..." : editingNeedId ? "Lưu thay đổi" : "Thêm mục này"}
             </button>
           </div>
         </form>
@@ -303,25 +303,25 @@ export function SupportNeedsSection({
             return (
               <article
                 key={need.id}
-                className="rounded-xl border border-slate-200 p-4"
+                className="rounded-2xl border-2 border-slate-200/90 p-4 transition hover:border-emerald-300"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-bold text-slate-950">
+                      <h3 className="font-black text-slate-950">
                         {need.needName}
                       </h3>
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600">
                         {SUPPORT_TYPE_LABELS[need.supportType]}
                       </span>
                       {need.isFulfilled ? (
-                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-                          Fulfilled
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200">
+                          Đã đủ
                         </span>
                       ) : null}
                     </div>
                     <p className="mt-2 text-sm text-slate-500">
-                      Received{" "}
+                      Đã nhận{" "}
                       <strong className="text-slate-800">
                         {formatQuantity(need.receivedQuantity, need.unit)}
                       </strong>{" "}
@@ -338,9 +338,9 @@ export function SupportNeedsSection({
                           setContributionNote("");
                           setError(null);
                         }}
-                        className="h-8 rounded-lg bg-violet-600 px-3 text-xs font-semibold text-white hover:bg-violet-700"
+                        className="h-8 rounded-xl bg-violet-600 px-3 text-xs font-bold text-white shadow-[0_2px_0_0_#5b21b6] hover:bg-violet-500 active:translate-y-0.5 active:shadow-none transition"
                       >
-                        Record contribution
+                        Đóng góp / Trao tặng
                       </button>
                     ) : null}
                     {canManage ? (
@@ -348,9 +348,9 @@ export function SupportNeedsSection({
                         <button
                           type="button"
                           onClick={() => startEdit(need)}
-                          className="h-8 rounded-lg border border-slate-300 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          className="h-8 rounded-xl border border-slate-300 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                         >
-                          Edit
+                          Sửa
                         </button>
                         <button
                           type="button"
@@ -358,38 +358,38 @@ export function SupportNeedsSection({
                           onClick={() => void handleDelete(need)}
                           title={
                             need.receivedQuantity > 0
-                              ? "A need with contributions cannot be deleted"
-                              : "Delete need"
+                              ? "Nhu cầu đã có người đóng góp không thể xóa"
+                              : "Xóa nhu cầu này"
                           }
-                          className="h-8 rounded-lg border border-rose-200 px-3 text-xs font-semibold text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="h-8 rounded-xl border border-rose-200 px-3 text-xs font-bold text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40 transition"
                         >
-                          Delete
+                          Xóa
                         </button>
                       </>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100">
                   <div
                     className="h-full rounded-full bg-emerald-500 transition-all"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <div className="mt-2 flex justify-between text-xs text-slate-400">
-                  <span>{Math.round(progress)}% complete</span>
+                <div className="mt-2 flex justify-between text-xs font-bold text-slate-400">
+                  <span>{Math.round(progress)}% đã hoàn thành</span>
                   <span>
-                    {formatQuantity(need.remainingQuantity, need.unit)} remaining
+                    Còn thiếu: {formatQuantity(need.remainingQuantity, need.unit)}
                   </span>
                 </div>
 
                 {contributingNeedId === need.id ? (
                   <form
                     onSubmit={handleContribution}
-                    className="mt-4 rounded-xl bg-violet-50 p-4"
+                    className="mt-4 rounded-2xl bg-violet-50/80 border-2 border-violet-100 p-4"
                   >
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <FormField label="Contribution quantity">
+                      <FormField label="Số lượng đóng góp">
                         <input
                           required
                           type="number"
@@ -403,14 +403,14 @@ export function SupportNeedsSection({
                           className={inputClassName}
                         />
                       </FormField>
-                      <FormField label="Note">
+                      <FormField label="Ghi chú đóng góp">
                         <input
                           maxLength={500}
                           value={contributionNote}
                           onChange={(event) =>
                             setContributionNote(event.target.value)
                           }
-                          placeholder="Handover details (optional)"
+                          placeholder="Thông tin bàn giao, vận chuyển (tùy chọn)"
                           className={inputClassName}
                         />
                       </FormField>
@@ -419,16 +419,16 @@ export function SupportNeedsSection({
                       <button
                         type="button"
                         onClick={() => setContributingNeedId(null)}
-                        className="h-8 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700"
+                        className="h-8 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                       >
-                        Cancel
+                        Hủy
                       </button>
                       <button
                         type="submit"
                         disabled={busy}
-                        className="h-8 rounded-lg bg-violet-600 px-3 text-xs font-semibold text-white disabled:bg-slate-300"
+                        className="h-8 rounded-xl bg-violet-600 px-3 text-xs font-black text-white shadow-[0_2px_0_0_#5b21b6] hover:bg-violet-500 active:translate-y-0.5 active:shadow-none transition disabled:bg-slate-300 disabled:shadow-none"
                       >
-                        {busy ? "Recording..." : "Confirm"}
+                        {busy ? "Đang ghi nhận..." : "Xác nhận đóng góp"}
                       </button>
                     </div>
                   </form>
@@ -436,23 +436,23 @@ export function SupportNeedsSection({
 
                 {needContributions.length ? (
                   <div className="mt-4 border-t border-slate-100 pt-4">
-                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Contribution history
+                    <p className="text-xs font-black uppercase tracking-wide text-slate-500">
+                      Lịch sử đóng góp
                     </p>
                     <div className="mt-3 space-y-2">
                       {needContributions.map((item) => (
                         <div
                           key={item.id}
-                          className="flex flex-col gap-1 rounded-lg bg-slate-50 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                          className="flex flex-col gap-1 rounded-xl bg-slate-50 px-3.5 py-2.5 text-sm sm:flex-row sm:items-center sm:justify-between"
                         >
                           <div>
-                            <span className="font-semibold text-slate-800">
+                            <span className="font-bold text-slate-800">
                               {item.contributorName}
                             </span>
-                            <span className="text-slate-500">
+                            <span className="text-slate-600">
                               {" "}
-                              contributed{" "}
-                              {formatQuantity(item.quantity, need.unit)}
+                              đã đóng góp{" "}
+                              <strong>{formatQuantity(item.quantity, need.unit)}</strong>
                             </span>
                             {item.note ? (
                               <p className="mt-1 text-xs text-slate-500">
@@ -473,14 +473,14 @@ export function SupportNeedsSection({
           })}
         </div>
       ) : (
-        <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
-          <p className="text-sm font-semibold text-slate-700">
-            No specific needs yet
+        <div className="mt-5 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
+          <p className="text-sm font-bold text-slate-700">
+            Chưa có nhu cầu cụ thể nào
           </p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
             {canManage
-              ? "Add needs so supporters know the exact quantities required."
-              : "The requester has not listed any specific goods or funding needs."}
+              ? "Hãy thêm các mục nhu cầu để người hỗ trợ biết chính xác số lượng cần thiết."
+              : "Người yêu cầu chưa liệt kê danh sách nhu yếu phẩm hoặc tài chính cụ thể."}
           </p>
         </div>
       )}
@@ -497,7 +497,7 @@ function FormField({
 }) {
   return (
     <label>
-      <span className="mb-1.5 block text-xs font-semibold text-slate-700">
+      <span className="mb-1.5 block text-xs font-bold text-slate-700">
         {label}
       </span>
       {children}
@@ -506,10 +506,10 @@ function FormField({
 }
 
 const inputClassName =
-  "h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100";
+  "h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100";
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
-    : "Unable to process the support need.";
+    : "Không thể xử lý nhu cầu hỗ trợ.";
 }

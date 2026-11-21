@@ -41,7 +41,7 @@ export function AdminReportsClient() {
             const data = await getAllReports(token);
             setReports(data);
         } catch (err: any) {
-            setError(err.message || "Failed to load reports.");
+            setError(err.message || "Không thể tải danh sách báo cáo vi phạm.");
         } finally {
             setLoading(false);
         }
@@ -64,7 +64,7 @@ export function AdminReportsClient() {
             await fetchReports();
             setIsModalOpen(false);
         } catch (err: any) {
-            alert(`Failed to review report: ${err.message}`);
+            alert(`Lỗi khi xem xét báo cáo: ${err.message}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -77,7 +77,7 @@ export function AdminReportsClient() {
     ) => {
         if (
             !window.confirm(
-                "Are you sure you want to RESOLVE this report? This action will apply strict penalties to the target.",
+                "Bạn có chắc muốn GIẢI QUYẾT báo cáo này? Hành động này sẽ xử lý kỷ luật đối tượng vi phạm theo quy định.",
             )
         )
             return;
@@ -92,7 +92,7 @@ export function AdminReportsClient() {
             await fetchReports();
             setIsModalOpen(false);
         } catch (err: any) {
-            alert(`Failed to resolve report: ${err.message}`);
+            alert(`Lỗi khi giải quyết báo cáo: ${err.message}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -106,12 +106,12 @@ export function AdminReportsClient() {
     return (
         <>
             <PageHeading
-                eyebrow="Moderation"
-                title="Reports"
-                description="Investigate community flags and enforce platform guidelines."
+                eyebrow="Kiểm duyệt nội dung"
+                title="Báo cáo vi phạm"
+                description="Điều tra các báo cáo vi phạm tiêu chuẩn cộng đồng từ người dùng và xử lý kỷ luật."
             />
 
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border-2 border-slate-200 shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-slate-200 bg-slate-50 flex gap-3 flex-wrap">
                     <select
                         value={statusFilter}
@@ -120,19 +120,19 @@ export function AdminReportsClient() {
                                 e.target.value as ReportStatus | "ALL",
                             )
                         }
-                        className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 min-w-[150px]"
+                        className="px-3.5 py-2 text-sm border-2 border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-w-[170px]"
                     >
-                        <option value="ALL">All Reports</option>
-                        <option value="PENDING">Pending (Action Req)</option>
-                        <option value="REVIEWED">Reviewed (Watching)</option>
-                        <option value="RESOLVED">Resolved (Closed)</option>
+                        <option value="ALL">Tất cả báo cáo</option>
+                        <option value="PENDING">Chờ xử lý (Cần giải quyết)</option>
+                        <option value="REVIEWED">Đã xem xét (Đang theo dõi)</option>
+                        <option value="RESOLVED">Đã giải quyết (Đã đóng)</option>
                     </select>
 
                     <button
                         onClick={fetchReports}
-                        className="px-3 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                        className="px-4 py-2 text-sm font-black text-slate-700 bg-white border-2 border-slate-200 rounded-xl shadow-[0_2px_0_0_#cbd5e1] hover:bg-slate-50 active:translate-y-0.5 active:shadow-none transition cursor-pointer"
                     >
-                        Refresh List
+                        Làm mới danh sách
                     </button>
                 </div>
 
@@ -144,13 +144,13 @@ export function AdminReportsClient() {
 
                 {loading ? (
                     <div className="py-10">
-                        <LoadingBlock />
+                        <LoadingBlock message="Đang tải danh sách báo cáo..." />
                     </div>
                 ) : filteredReports.length === 0 ? (
                     <div className="py-8 border-t border-slate-100">
                         <EmptyState
-                            title="No reports found"
-                            description="The community is looking good!"
+                            title="Không có báo cáo nào"
+                            description="Cộng đồng HelpHub hiện tại rất tích cực và an toàn!"
                         />
                     </div>
                 ) : (
@@ -165,9 +165,9 @@ export function AdminReportsClient() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 report={selectedReport}
-                isSubmitting={isSubmitting}
                 onReview={handleReview}
                 onResolve={handleResolve}
+                isSubmitting={isSubmitting}
             />
         </>
     );

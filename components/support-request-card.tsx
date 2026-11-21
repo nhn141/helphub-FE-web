@@ -15,11 +15,11 @@ export function SupportRequestCard({
   footer?: React.ReactNode;
 }) {
   return (
-    <Card className="group flex h-full flex-col overflow-hidden border border-border/80 bg-card transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg">
+    <Card className="group flex h-full flex-col overflow-hidden rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white transition-all duration-200 hover:-translate-y-1 hover:border-emerald-400 hover:shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-5 pb-2">
         <Badge
           variant="secondary"
-          className="bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-medium px-2.5 py-0.5"
+          className="bg-emerald-50 text-emerald-800 border-2 border-emerald-200 font-bold px-3 py-0.5"
         >
           {request.categoryName}
         </Badge>
@@ -29,37 +29,41 @@ export function SupportRequestCard({
       <CardContent className="flex flex-1 flex-col p-5 pt-3">
         <Link
           href={`/support-requests/${request.id}`}
-          className="group/link flex items-start justify-between gap-2 text-lg font-bold leading-snug text-foreground transition hover:text-emerald-700"
+          className="group/link flex items-start justify-between gap-2 text-lg font-black leading-snug text-slate-900 transition hover:text-emerald-700"
         >
           <span>{request.title}</span>
           <ArrowUpRight className="size-4 shrink-0 opacity-0 transition-all duration-200 group-hover/link:opacity-100 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 text-emerald-600" />
         </Link>
 
-        <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+        <div className="mt-4 space-y-2 text-sm text-slate-500 font-medium">
           <div className="flex items-center gap-2">
-            <User className="size-4 shrink-0 text-muted-foreground/70" />
-            <span className="truncate font-medium text-foreground/80">{request.requesterName}</span>
+            <div className="flex size-6 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+              <User className="size-3.5" />
+            </div>
+            <span className="truncate font-bold text-slate-700">{request.requesterName}</span>
           </div>
           <div className="flex items-start gap-2">
-            <MapPin className="size-4 shrink-0 text-muted-foreground/70 mt-0.5" />
-            <span className="line-clamp-2">
-              {request.address || "No address provided"}
+            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 mt-0.5">
+              <MapPin className="size-3.5" />
+            </div>
+            <span className="line-clamp-2 text-xs leading-relaxed text-slate-600">
+              {request.address || "Chưa có địa chỉ cụ thể"}
             </span>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="mt-auto flex flex-col items-stretch border-t border-border/60 p-5 pt-3">
-        <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <Clock className="size-3.5" />
+      <CardFooter className="mt-auto flex flex-col items-stretch border-t-2 border-slate-100 bg-slate-50/50 p-5 pt-3.5">
+        <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5 font-medium">
+            <Clock className="size-3.5 text-slate-400" />
             {formatDateTime(request.createdAt)}
           </span>
           <Link
             href={`/support-requests/${request.id}`}
-            className="font-semibold text-emerald-700 hover:text-emerald-800 transition"
+            className="inline-flex items-center gap-1 font-bold text-emerald-700 hover:text-emerald-800 transition"
           >
-            View details &rarr;
+            Chi tiết &rarr;
           </Link>
         </div>
         {footer ? <div className="mt-3">{footer}</div> : null}

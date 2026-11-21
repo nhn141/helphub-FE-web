@@ -53,26 +53,26 @@ export function ReportModal({
         reason: reason.trim(),
       });
 
-      toast.success("Report submitted successfully", {
-        description: "Thank you for helping keep our community safe. Our team will review it.",
+      toast.success("Báo cáo vi phạm đã được gửi thành công", {
+        description: "Cảm ơn bạn đã chung tay bảo vệ môi trường cộng đồng văn minh, an toàn.",
       });
       setReason("");
       onClose();
     } catch (err: any) {
       const errorMsg =
         err.message ||
-        "Failed to submit report. You might have already reported this item.";
+        "Gửi báo cáo thất bại. Có thể bạn đã báo cáo nội dung này trước đó.";
       setError(errorMsg);
-      toast.error("Submission failed", { description: errorMsg });
+      toast.error("Không thể gửi báo cáo", { description: errorMsg });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const typeLabels = {
-    POST: "Post",
-    SUPPORT_REQUEST: "Support Request",
-    USER: "User",
+    POST: "bài viết",
+    SUPPORT_REQUEST: "yêu cầu hỗ trợ",
+    USER: "người dùng",
   };
 
   return (
@@ -81,27 +81,27 @@ export function ReportModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-rose-600">
             <Flag className="size-5" />
-            Report {typeLabels[targetType]}
+            Báo cáo {typeLabels[targetType]}
           </DialogTitle>
           <DialogDescription>
-            You are reporting {title ? (
-              <span className="font-semibold text-foreground">"{title}"</span>
+            Bạn đang báo cáo {title ? (
+              <span className="font-bold text-foreground">"{title}"</span>
             ) : (
-              `this ${typeLabels[targetType].toLowerCase()}`
-            )}. Our moderation team will review it carefully.
+              `nội dung ${typeLabels[targetType]}`
+            )}. Đội ngũ kiểm duyệt sẽ tiếp nhận và xử lý theo đúng quy định.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 text-sm text-rose-700 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-lg">
+            <div className="p-3 text-sm text-rose-700 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl font-medium">
               {error}
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="report-reason" className="text-foreground">
-              Reason for reporting <span className="text-rose-500">*</span>
+            <Label htmlFor="report-reason" className="text-foreground font-bold">
+              Lý do báo cáo vi phạm <span className="text-rose-500">*</span>
             </Label>
             <Textarea
               id="report-reason"
@@ -111,8 +111,8 @@ export function ReportModal({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               disabled={isSubmitting}
-              placeholder="Please provide specific details about why this violates our community guidelines..."
-              className="resize-none"
+              placeholder="Vui lòng cung cấp chi tiết vi phạm (ví dụ: thông tin sai sự thật, xúc phạm, trục lợi từ thiện...)"
+              className="resize-none rounded-xl"
             />
             <p className="text-xs text-muted-foreground text-right">
               {reason.length}/1000
@@ -125,22 +125,23 @@ export function ReportModal({
               variant="outline"
               onClick={onClose}
               disabled={isSubmitting}
+              className="rounded-xl font-bold"
             >
-              Cancel
+              Hủy bỏ
             </Button>
             <Button
               type="submit"
               variant="destructive"
               disabled={isSubmitting || !reason.trim()}
-              className="gap-2 font-medium"
+              className="gap-2 font-black rounded-xl"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Submitting...
+                  Đang gửi...
                 </>
               ) : (
-                "Submit Report"
+                "Gửi báo cáo"
               )}
             </Button>
           </DialogFooter>

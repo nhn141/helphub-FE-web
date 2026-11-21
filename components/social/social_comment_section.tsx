@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Loader2, Send, Trash2, Edit3, X, Check } from "lucide-react";
 import {
     PostComment,
     getPostComments,
@@ -47,7 +48,7 @@ export function SocialCommentSection({
                             comment.authorName ||
                             (assumedAuthorId === profile?.id
                                 ? profile?.fullName
-                                : "HelpHub User"),
+                                : "Thành viên HelpHub"),
                         authorAvatarUrl:
                             comment.authorAvatarUrl ||
                             (assumedAuthorId === profile?.id
@@ -85,7 +86,7 @@ export function SocialCommentSection({
                 authorName:
                     addedComment.authorName ||
                     profile?.fullName ||
-                    "HelpHub User",
+                    "Thành viên HelpHub",
                 authorAvatarUrl:
                     addedComment.authorAvatarUrl || profile?.avatarUrl || null,
                 createdAt: addedComment.createdAt || new Date().toISOString(),
@@ -101,7 +102,7 @@ export function SocialCommentSection({
     };
 
     const handleDelete = async (commentId: string) => {
-        const confirmDelete = window.confirm("Delete this comment?");
+        const confirmDelete = window.confirm("Bạn có muốn xóa bình luận này?");
         if (!confirmDelete) return;
 
         setProcessingId(commentId);
@@ -110,7 +111,7 @@ export function SocialCommentSection({
             setComments((prev) => prev.filter((c) => c.id !== commentId));
         } catch (error) {
             console.error("Failed to delete comment:", error);
-            alert("Failed to delete comment.");
+            alert("Không thể xóa bình luận.");
         } finally {
             setProcessingId(null);
         }
@@ -133,46 +134,71 @@ export function SocialCommentSection({
             setEditingId(null);
         } catch (error) {
             console.error("Failed to update comment:", error);
-            alert("Failed to update comment.");
+            alert("Không thể cập nhật bình luận.");
         } finally {
             setProcessingId(null);
         }
     };
 
+    const userInitial = profile?.fullName
+        ? profile.fullName.trim().charAt(0).toUpperCase()
+        : "U";
+
     if (isLoading) {
         return (
-            <div className="py-4 text-center text-sm text-gray-500">
-                Loading comments...
+            <div className="flex items-center justify-center gap-2 py-4 text-xs font-bold text-slate-400">
+                <Loader2 className="size-4 animate-spin text-emerald-600" />
+                <span>Đang tải các bình luận...</span>
             </div>
         );
     }
 
     return (
-        <div className="pt-4 mt-2 border-t border-gray-100">
-            <form onSubmit={handleCreate} className="flex gap-2 mb-4">
-                <input
-                    type="text"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Write a comment..."
-                    disabled={isSubmitting}
-                    className="flex-1 px-3 py-2 text-sm bg-gray-50 border rounded-full focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white"
-                />
-                <button
-                    type="submit"
-                    disabled={!newComment.trim() || isSubmitting}
-                    className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-full hover:bg-emerald-700 disabled:opacity-50 transition"
-                >
-                    Post
-                </button>
+        <div className="space-y-4 pt-1">
+            {/* Inline Comment Composer Twitter style */}
+            <form onSubmit={handleCreate} className="flex items-center gap-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-100 text-xs font-black text-emerald-900 shadow-xs">
+                    {profile?.avatarUrl ? (
+                        <img
+                            src={profile.avatarUrl}
+                            alt={profile.fullName}
+                            className="size-full rounded-xl object-cover"
+                        />
+                    ) : (
+                        <span>{userInitial}</span>
+                    )}
+                </div>
+
+                <div className="flex-1 relative flex items-center">
+                    <input
+                        type="text"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Viết câu trả lời của bạn..."
+                        disabled={isSubmitting}
+                        className="w-full rounded-full border-2 border-slate-200 bg-slate-50/80 px-4 py-2 pr-16 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:outline-none transition"
+                    />
+                    <button
+                        type="submit"
+                        disabled={!newComment.trim() || isSubmitting}
+                        className="absolute right-1.5 flex h-7 items-center gap-1 rounded-full bg-emerald-600 px-3 text-xs font-black text-white shadow-[0_2px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-0.5 active:shadow-none disabled:opacity-40 disabled:shadow-none transition cursor-pointer"
+                    >
+                        {isSubmitting ? (
+                            <Loader2 className="size-3 animate-spin" />
+                        ) : (
+                            <span>Gửi</span>
+                        )}
+                    </button>
+                </div>
             </form>
 
+            {/* Comments List */}
             {comments.length === 0 ? (
-                <p className="text-sm text-center text-gray-500 py-2">
-                    No comments yet.
+                <p className="py-2 text-center text-xs font-bold text-slate-400">
+                    Chưa có bình luận nào. Hãy là người đầu tiên phản hồi!
                 </p>
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 pt-1">
                     {comments.map((comment) => {
                         const isCommentOwner = profile?.id === comment.authorId;
                         const canDelete =
@@ -181,31 +207,51 @@ export function SocialCommentSection({
                             profile?.role === "ADMIN";
                         const isEditing = editingId === comment.id;
 
+                        const commentAuthorInitial = (
+                            comment.authorName || "U"
+                        )
+                            .trim()
+                            .charAt(0)
+                            .toUpperCase();
+
                         return (
-                            <div key={comment.id} className="flex gap-2 group">
-                                <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-xs font-bold text-gray-500">
+                            <div
+                                key={comment.id}
+                                className="group flex gap-2.5 items-start"
+                            >
+                                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-[11px] font-black text-slate-700 overflow-hidden mt-0.5">
                                     {comment.authorAvatarUrl ? (
                                         <img
                                             src={comment.authorAvatarUrl}
                                             alt={comment.authorName}
-                                            className="w-full h-full object-cover"
+                                            className="size-full object-cover"
                                         />
                                     ) : (
-                                        (comment.authorName || "U")
-                                            .charAt(0)
-                                            .toUpperCase()
+                                        <span>{commentAuthorInitial}</span>
                                     )}
                                 </div>
 
-                                <div className="flex-1">
-                                    <div className="bg-gray-50 p-2.5 rounded-2xl rounded-tl-none inline-block min-w-[200px] max-w-full">
-                                        <h5 className="text-xs font-semibold text-gray-900">
-                                            {comment.authorName ||
-                                                "HelpHub User"}
-                                        </h5>
+                                <div className="flex-1 min-w-0">
+                                    <div className="rounded-2xl border border-slate-200/80 bg-slate-50/90 px-3.5 py-2.5 inline-block max-w-full">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <span className="text-xs font-black text-slate-900">
+                                                {comment.authorName ||
+                                                    "Thành viên HelpHub"}
+                                            </span>
+                                            <span className="text-[10px] font-semibold text-slate-400">
+                                                {new Date(
+                                                    comment.createdAt,
+                                                ).toLocaleDateString("vi-VN", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })}
+                                            </span>
+                                        </div>
 
                                         {isEditing ? (
-                                            <div className="mt-1">
+                                            <div className="mt-1.5 space-y-2">
                                                 <input
                                                     type="text"
                                                     value={editContent}
@@ -214,10 +260,10 @@ export function SocialCommentSection({
                                                             e.target.value,
                                                         )
                                                     }
-                                                    className="w-full px-2 py-1 text-sm border rounded mb-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                    className="w-full rounded-lg border-2 border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 focus:border-emerald-400 focus:outline-none"
                                                     autoFocus
                                                 />
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-1.5">
                                                     <button
                                                         onClick={() =>
                                                             handleUpdate(
@@ -228,9 +274,10 @@ export function SocialCommentSection({
                                                             processingId ===
                                                             comment.id
                                                         }
-                                                        className="text-[10px] font-semibold text-emerald-600 hover:text-emerald-700"
+                                                        className="flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition cursor-pointer"
                                                     >
-                                                        Save
+                                                        <Check className="size-3" />
+                                                        Lưu
                                                     </button>
                                                     <button
                                                         onClick={() =>
@@ -240,31 +287,22 @@ export function SocialCommentSection({
                                                             processingId ===
                                                             comment.id
                                                         }
-                                                        className="text-[10px] font-medium text-gray-500 hover:text-gray-700"
+                                                        className="flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
                                                     >
-                                                        Cancel
+                                                        <X className="size-3" />
+                                                        Hủy
                                                     </button>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="text-sm text-gray-800 mt-0.5">
+                                            <p className="text-xs font-normal text-slate-800 leading-relaxed whitespace-pre-wrap break-words">
                                                 {comment.content}
                                             </p>
                                         )}
                                     </div>
 
                                     {!isEditing && (
-                                        <div className="flex items-center gap-3 mt-1 ml-2 text-[10px] text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span>
-                                                {new Date(
-                                                    comment.createdAt,
-                                                ).toLocaleDateString("en-US", {
-                                                    month: "short",
-                                                    day: "numeric",
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
-                                            </span>
+                                        <div className="flex items-center gap-3 mt-1 ml-2 text-[10px] font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {isCommentOwner && (
                                                 <button
                                                     onClick={() => {
@@ -275,9 +313,9 @@ export function SocialCommentSection({
                                                             comment.content,
                                                         );
                                                     }}
-                                                    className="hover:text-blue-600"
+                                                    className="hover:text-sky-600 transition cursor-pointer"
                                                 >
-                                                    Edit
+                                                    Sửa
                                                 </button>
                                             )}
                                             {canDelete && (
@@ -289,11 +327,11 @@ export function SocialCommentSection({
                                                         processingId ===
                                                         comment.id
                                                     }
-                                                    className="hover:text-red-600"
+                                                    className="hover:text-rose-600 transition cursor-pointer"
                                                 >
                                                     {processingId === comment.id
-                                                        ? "Deleting..."
-                                                        : "Delete"}
+                                                        ? "Đang xóa..."
+                                                        : "Xóa"}
                                                 </button>
                                             )}
                                         </div>

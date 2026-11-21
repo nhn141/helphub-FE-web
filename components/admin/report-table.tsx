@@ -8,16 +8,28 @@ interface ReportTableProps {
 }
 
 export function ReportTable({ reports, onActionClick }: ReportTableProps) {
+    const targetTypeLabels: Record<string, string> = {
+        USER: "Người dùng",
+        POST: "Bài viết",
+        SUPPORT_REQUEST: "Yêu cầu hỗ trợ",
+    };
+
+    const statusLabels: Record<string, string> = {
+        PENDING: "Chờ xử lý",
+        REVIEWED: "Đã xem xét",
+        RESOLVED: "Đã giải quyết",
+    };
+
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
+                <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-bold border-b border-slate-200">
                     <tr>
-                        <th className="px-5 py-3">Report Target</th>
-                        <th className="px-5 py-3">Violation Reason</th>
-                        <th className="px-5 py-3">Status</th>
-                        <th className="px-5 py-3">Date</th>
-                        <th className="px-5 py-3 text-right">Action</th>
+                        <th className="px-5 py-3">Đối tượng</th>
+                        <th className="px-5 py-3">Lý do vi phạm</th>
+                        <th className="px-5 py-3">Trạng thái</th>
+                        <th className="px-5 py-3">Thời gian</th>
+                        <th className="px-5 py-3 text-right">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -28,16 +40,15 @@ export function ReportTable({ reports, onActionClick }: ReportTableProps) {
                         >
                             <td className="px-5 py-3">
                                 <span
-                                    className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold mb-1
-                  ${
-                      report.targetType === "USER"
-                          ? "bg-blue-100 text-blue-800"
-                          : report.targetType === "POST"
-                            ? "bg-purple-100 text-purple-800"
-                            : "bg-orange-100 text-orange-800"
-                  }`}
+                                    className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-bold mb-1
+                  ${report.targetType === "USER"
+                                            ? "bg-blue-100 text-blue-800"
+                                            : report.targetType === "POST"
+                                                ? "bg-purple-100 text-purple-800"
+                                                : "bg-orange-100 text-orange-800"
+                                        }`}
                                 >
-                                    {report.targetType}
+                                    {targetTypeLabels[report.targetType] || report.targetType}
                                 </span>
                                 <p
                                     className="text-xs text-slate-500 font-mono"
@@ -48,48 +59,50 @@ export function ReportTable({ reports, onActionClick }: ReportTableProps) {
                             </td>
 
                             <td className="px-5 py-3">
-                                <p className="font-semibold text-rose-700">
+                                <p className="font-bold text-rose-700">
                                     {report.reason}
                                 </p>
-                                <p className="text-xs text-slate-500">
-                                    By: {report.reporterName}
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                    Người báo cáo: {report.reporterName}
                                 </p>
                             </td>
 
                             <td className="px-5 py-3">
                                 <span
                                     className={`text-[10px] uppercase font-bold px-2 py-1 rounded
-                  ${
-                      report.status === "PENDING"
-                          ? "bg-rose-100 text-rose-800"
-                          : report.status === "REVIEWED"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-slate-200 text-slate-600"
-                  }`}
+                  ${report.status === "PENDING"
+                                            ? "bg-rose-100 text-rose-800"
+                                            : report.status === "REVIEWED"
+                                                ? "bg-amber-100 text-amber-800"
+                                                : "bg-slate-200 text-slate-600"
+                                        }`}
                                 >
-                                    {report.status}
+                                    {statusLabels[report.status] || report.status}
                                 </span>
                             </td>
 
-                            <td className="px-5 py-3 text-xs">
+                            <td className="px-5 py-3 text-xs text-slate-500 font-medium">
                                 {new Date(
                                     report.createdAt,
-                                ).toLocaleDateString()}
+                                ).toLocaleDateString("vi-VN", {
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                })}
                             </td>
 
                             <td className="px-5 py-3 text-right">
                                 <button
                                     onClick={() => onActionClick(report)}
-                                    className={`text-xs font-semibold px-3 py-1.5 rounded transition
-                    ${
-                        report.status === "RESOLVED"
-                            ? "text-slate-500 hover:bg-slate-100 border border-slate-200"
-                            : "text-rose-600 hover:bg-rose-50 border border-rose-200 bg-white"
-                    }`}
+                                    className={`text-xs font-bold px-3 py-1.5 rounded-xl transition cursor-pointer
+                    ${report.status === "RESOLVED"
+                                            ? "text-slate-600 hover:bg-slate-100 border border-slate-200 bg-white"
+                                            : "text-rose-600 hover:bg-rose-50 border border-rose-200 bg-white shadow-2xs"
+                                        }`}
                                 >
                                     {report.status === "RESOLVED"
-                                        ? "View"
-                                        : "Review"}
+                                        ? "Xem chi tiết"
+                                        : "Xử lý vi phạm"}
                                 </button>
                             </td>
                         </tr>

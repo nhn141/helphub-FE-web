@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 
 import { useAuth } from "@/components/auth-provider";
 import { NotificationBell } from "@/components/notification-bell";
+import { HelpHubLogo } from "@/components/helphub-logo";
 import type { UserRole } from "@/lib/api";
 import { ROLE_LABELS } from "@/lib/support-request-ui";
 
@@ -19,28 +20,28 @@ type NavigationItem = {
 const navigation: NavigationItem[] = [
     {
         href: "/dashboard",
-        label: "Overview",
+        label: "Tổng quan",
         icon: HomeIcon,
     },
     {
         href: "/support-requests",
-        label: "Support requests",
+        label: "Yêu cầu hỗ trợ",
         icon: SupportIcon,
     },
     {
         href: "/support-locations",
-        label: "Support locations",
+        label: "Điểm tiếp nhận",
         icon: LocationHubIcon,
         roles: ["ADMIN", "COLLABORATOR"],
     },
     {
         href: "/social",
-        label: "Community Feed",
+        label: "Bảng tin cộng đồng",
         icon: UsersIcon,
     },
     {
         href: "/messages",
-        label: "Messages",
+        label: "Tin nhắn",
         icon: MessageIcon,
     },
 ];
@@ -51,8 +52,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
-        <div className="min-h-dvh bg-[#f4f6f2] text-slate-950">
-            <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-slate-200 bg-[#10261f] text-white lg:flex lg:flex-col">
+        <div className="min-h-dvh bg-[#f4f6f2] text-slate-950 font-sans">
+            {/* Desktop Duolingo-style Sidebar */}
+            <aside className="fixed inset-y-0 left-0 z-40 hidden w-68 border-r-2 border-emerald-950/40 bg-[#10261f] text-white lg:flex lg:flex-col shadow-xl">
                 <SidebarContent
                     pathname={pathname}
                     profileName={profile.fullName}
@@ -62,15 +64,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                 />
             </aside>
 
+            {/* Mobile Drawer */}
             {mobileMenuOpen ? (
                 <div className="fixed inset-0 z-50 lg:hidden">
                     <button
                         type="button"
                         aria-label="Close menu"
-                        className="absolute inset-0 bg-slate-950/45"
+                        className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"
                         onClick={() => setMobileMenuOpen(false)}
                     />
-                    <aside className="relative flex h-full w-[min(86vw,320px)] flex-col bg-[#10261f] text-white shadow-2xl">
+                    <aside className="relative flex h-full w-[min(86vw,320px)] flex-col bg-[#10261f] text-white shadow-2xl border-r-2 border-emerald-950/40">
                         <SidebarContent
                             pathname={pathname}
                             profileName={profile.fullName}
@@ -83,23 +86,25 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </div>
             ) : null}
 
-            <div className="lg:pl-64">
-                <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
+            {/* Main content area */}
+            <div className="lg:pl-68">
+                {/* Header */}
+                <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b-2 border-slate-200/80 bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:px-8 shadow-xs">
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
                             aria-label="Open menu"
                             onClick={() => setMobileMenuOpen(true)}
-                            className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 lg:hidden"
+                            className="flex size-10 items-center justify-center rounded-xl border-2 border-slate-200 bg-white text-slate-700 shadow-[0_2px_0_0_#cbd5e1] active:translate-y-0.5 active:shadow-none lg:hidden cursor-pointer"
                         >
                             <MenuIcon />
                         </button>
                         <div>
-                            <p className="text-sm font-semibold text-slate-950">
+                            <p className="text-base font-black tracking-tight text-slate-900">
                                 {getPageTitle(pathname)}
                             </p>
-                            <p className="hidden text-xs text-slate-500 sm:block">
-                                Transparent support matched to real needs
+                            <p className="hidden text-xs font-semibold text-emerald-700/80 sm:block">
+                                Hỗ trợ minh bạch • Kết nối kịp thời
                             </p>
                         </div>
                     </div>
@@ -108,16 +113,17 @@ export function AppShell({ children }: { children: ReactNode }) {
                         {profile.role === "REQUESTER" ? (
                             <Link
                                 href="/support-requests/new"
-                                className="hidden h-9 items-center gap-2 rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 sm:flex"
+                                className="hidden h-10 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-xs sm:text-sm font-black text-white shadow-[0_3px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-0.5 active:shadow-none transition-all sm:flex"
                             >
                                 <PlusIcon />
-                                Create request
+                                Tạo yêu cầu
                             </Link>
                         ) : null}
                         <NotificationBell />
                         <Link
                             href="/profile"
-                            className="flex size-9 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-800 hover:bg-emerald-200 transition"
+                            className="flex size-10 items-center justify-center rounded-2xl border-2 border-emerald-300 bg-emerald-100 text-sm font-black text-emerald-900 shadow-[0_2px_0_0_#a7f3d0] hover:bg-emerald-200 active:translate-y-0.5 active:shadow-none transition"
+                            title={profile.fullName}
                         >
                             {getInitials(profile.fullName)}
                         </Link>
@@ -149,19 +155,21 @@ function SidebarContent({
 }) {
     return (
         <>
-            <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-400 text-lg font-black text-[#10261f]">
-                    H
+            {/* Duolingo Brand Header */}
+            <div className="flex h-20 items-center gap-3.5 border-b-2 border-white/10 px-6">
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-white p-1.5 shadow-[0_4px_0_0_#059669]">
+                    <HelpHubLogo className="size-full" />
                 </div>
                 <div>
-                    <p className="text-lg font-bold tracking-tight">HelpHub</p>
-                    <p className="text-xs text-emerald-100/70">
-                        Support coordination portal
+                    <p className="text-xl font-black tracking-wide text-white">HelpHub</p>
+                    <p className="text-[11px] font-bold text-emerald-300/80 uppercase tracking-wider">
+                        Cổng hỗ trợ & kết nối
                     </p>
                 </div>
             </div>
 
-            <nav className="flex-1 space-y-1 px-3 py-6">
+            {/* Navigation items Duolingo tactile style */}
+            <nav className="flex-1 space-y-2 px-3.5 py-6">
                 {navigation
                     .filter(
                         (item) =>
@@ -180,43 +188,55 @@ function SidebarContent({
                                 key={item.href}
                                 href={item.href}
                                 onClick={onNavigate}
-                                className={`flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition ${
-                                    active
-                                        ? "bg-emerald-400 text-[#10261f]"
-                                        : "text-white/70 hover:bg-white/8 hover:text-white"
-                                }`}
+                                className={`flex h-12 items-center gap-3.5 rounded-2xl px-4 text-sm font-black tracking-wide transition-all ${active
+                                        ? "bg-emerald-400 text-[#10261f] shadow-[0_4px_0_0_#059669] border border-emerald-300"
+                                        : "text-emerald-100/75 hover:bg-white/10 hover:text-white"
+                                    }`}
                             >
-                                <Icon />
-                                {item.label}
+                                <span className={`flex size-6 items-center justify-center shrink-0 ${active ? "text-[#10261f]" : "text-emerald-300"}`}>
+                                    <Icon />
+                                </span>
+                                <span>{item.label}</span>
                             </Link>
                         );
                     })}
             </nav>
 
-            <div className="border-t border-white/10 p-4">
-                <div className="rounded-xl bg-white/6 p-3">
-                    <p className="truncate text-sm font-semibold">
-                        {profileName}
-                    </p>
-                    <p className="mt-0.5 truncate text-xs text-white/55">
-                        {profileRole}
-                    </p>
-                    <Link
-                        href="/profile"
-                        onClick={onNavigate}
-                        className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-emerald-500/10 text-xs font-semibold text-emerald-200 hover:bg-emerald-500/20 transition"
-                    >
-                        <UserIcon />
-                        Profile
-                    </Link>
-                    <button
-                        type="button"
-                        onClick={onLogout}
-                        className="mt-2 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-white/12 text-xs font-semibold text-white/75 hover:bg-white/8 hover:text-white transition"
-                    >
-                        <LogoutIcon />
-                        Sign out
-                    </button>
+            {/* Duolingo-style Profile Card */}
+            <div className="border-t-2 border-white/10 p-4">
+                <div className="rounded-2xl border-2 border-white/15 bg-white/5 p-4 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 font-black text-sm">
+                            {getInitials(profileName)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-black text-white">
+                                {profileName}
+                            </p>
+                            <span className="inline-block mt-0.5 rounded-full border border-emerald-400/30 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-300">
+                                {profileRole}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="mt-3.5 flex gap-2">
+                        <Link
+                            href="/profile"
+                            onClick={onNavigate}
+                            className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-500/15 text-xs font-bold text-emerald-200 shadow-[0_2px_0_0_rgba(16,185,129,0.2)] hover:bg-emerald-500/25 active:translate-y-0.5 active:shadow-none transition"
+                        >
+                            <UserIcon />
+                            Hồ sơ
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={onLogout}
+                            className="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 text-xs font-bold text-white/80 shadow-[0_2px_0_0_rgba(255,255,255,0.1)] hover:bg-white/10 hover:text-white active:translate-y-0.5 active:shadow-none transition cursor-pointer"
+                            title="Đăng xuất"
+                        >
+                            <LogoutIcon />
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
@@ -225,38 +245,38 @@ function SidebarContent({
 
 function getPageTitle(pathname: string): string {
     if (pathname === "/support-requests/new") {
-        return "Create support request";
+        return "Tạo yêu cầu hỗ trợ";
     }
 
     if (pathname.includes("/edit")) {
-        return "Edit request";
+        return "Chỉnh sửa yêu cầu";
     }
 
     if (pathname.startsWith("/support-requests/")) {
-        return "Request details";
+        return "Chi tiết yêu cầu";
     }
 
     if (pathname.startsWith("/support-requests")) {
-        return "Support requests";
+        return "Danh sách yêu cầu";
     }
 
     if (pathname.startsWith("/support-locations")) {
-        return "Support locations";
+        return "Điểm tiếp nhận hỗ trợ";
     }
 
     if (pathname.startsWith("/social")) {
-        return "Community Feed";
+        return "Bảng tin cộng đồng";
     }
 
     if (pathname.startsWith("/messages")) {
-        return "Messages";
+        return "Hộp thư nhắn tin";
     }
 
     if (pathname.startsWith("/profile")) {
-        return "User Profile";
+        return "Hồ sơ cá nhân";
     }
 
-    return "Overview";
+    return "Tổng quan";
 }
 
 function getInitials(name: string): string {
@@ -276,7 +296,7 @@ function HomeIcon() {
             className="size-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2.2"
         >
             <path
                 d="m3 10 9-7 9 7"
@@ -296,7 +316,7 @@ function SupportIcon() {
             className="size-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2.2"
         >
             <path
                 d="M12 21s-8-4.7-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.3-8 11-8 11Z"
@@ -315,7 +335,7 @@ function LocationHubIcon() {
             className="size-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
         >
@@ -334,7 +354,7 @@ function UsersIcon() {
             className="size-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
         >
@@ -354,7 +374,7 @@ function MessageIcon() {
             className="size-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
         >
@@ -371,7 +391,7 @@ function MenuIcon() {
             className="size-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2.2"
             strokeLinecap="round"
         >
             <path d="M4 7h16M4 12h16M4 17h16" />
@@ -387,7 +407,7 @@ function PlusIcon() {
             className="size-4"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.5"
             strokeLinecap="round"
         >
             <path d="M12 5v14M5 12h14" />
@@ -403,7 +423,7 @@ function LogoutIcon() {
             className="size-4"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
         >
@@ -420,7 +440,7 @@ function UserIcon() {
             className="size-4"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
         >

@@ -75,13 +75,13 @@ export function VolunteerAssignmentsSection({
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="rounded-3xl border-2 border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div>
-        <h2 className="text-lg font-bold text-slate-950">
-          Volunteer applications
+        <h2 className="text-lg font-black text-slate-950">
+          Đơn đăng ký tình nguyện
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Review volunteers who want to participate in this request.
+          Xem xét các tình nguyện viên đã đăng ký tham gia hỗ trợ cho yêu cầu này.
         </p>
       </div>
 
@@ -96,21 +96,21 @@ export function VolunteerAssignmentsSection({
           {assignments.map((assignment) => (
             <article
               key={assignment.volunteerId}
-              className="rounded-xl border border-slate-200 p-4"
+              className="rounded-2xl border-2 border-slate-200 p-4 transition hover:border-emerald-300"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-bold text-slate-950">
+                    <h3 className="font-black text-slate-950">
                       {assignment.volunteerName}
                     </h3>
                     <AssignmentStatusBadge status={assignment.status} />
                   </div>
-                  <div className="mt-2 space-y-1 text-sm text-slate-500">
+                  <div className="mt-2 space-y-1 text-sm text-slate-500 font-medium">
                     <p>{assignment.volunteerEmail}</p>
-                    <p>{assignment.volunteerPhone || "No phone number provided"}</p>
+                    <p>{assignment.volunteerPhone || "Chưa cung cấp số điện thoại"}</p>
                     <p className="text-xs text-slate-400">
-                      Applied {formatDateTime(assignment.assignedAt)}
+                      Đã nộp đơn lúc {formatDateTime(assignment.assignedAt)}
                     </p>
                   </div>
                 </div>
@@ -121,9 +121,9 @@ export function VolunteerAssignmentsSection({
                       type="button"
                       disabled={busyVolunteerId === assignment.volunteerId}
                       onClick={() => void approve(assignment.volunteerId)}
-                      className="h-9 rounded-lg bg-emerald-700 px-3 text-xs font-semibold text-white hover:bg-emerald-800 disabled:bg-slate-300"
+                      className="h-9 rounded-xl bg-emerald-600 px-4 text-xs font-black text-white shadow-[0_2px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-0.5 active:shadow-none transition disabled:bg-slate-300 disabled:shadow-none"
                     >
-                      Accept
+                      Chấp thuận
                     </button>
                     <button
                       type="button"
@@ -131,25 +131,25 @@ export function VolunteerAssignmentsSection({
                         setRejectingVolunteerId(assignment.volunteerId);
                         setRejectionReason("");
                       }}
-                      className="h-9 rounded-lg border border-rose-200 px-3 text-xs font-semibold text-rose-700 hover:bg-rose-50"
+                      className="h-9 rounded-xl border border-rose-200 px-3.5 text-xs font-bold text-rose-700 hover:bg-rose-50 transition"
                     >
-                      Reject
+                      Từ chối
                     </button>
                   </div>
                 ) : null}
               </div>
 
               {assignment.rejectionReason ? (
-                <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800">
-                  Rejection reason: {assignment.rejectionReason}
+                <p className="mt-3 rounded-xl bg-rose-50 px-3.5 py-2 text-sm font-medium text-rose-800 border border-rose-200">
+                  Lý do từ chối: {assignment.rejectionReason}
                 </p>
               ) : null}
 
               {rejectingVolunteerId === assignment.volunteerId ? (
-                <div className="mt-4 rounded-xl bg-rose-50 p-4">
+                <div className="mt-4 rounded-2xl bg-rose-50/80 border-2 border-rose-200 p-4">
                   <label>
-                    <span className="mb-1.5 block text-xs font-semibold text-rose-900">
-                      Rejection reason
+                    <span className="mb-1.5 block text-xs font-bold text-rose-900">
+                      Lý do từ chối (bắt buộc)
                     </span>
                     <textarea
                       required
@@ -159,16 +159,16 @@ export function VolunteerAssignmentsSection({
                       onChange={(event) =>
                         setRejectionReason(event.target.value)
                       }
-                      className="w-full rounded-lg border border-rose-200 bg-white px-3 py-2 text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
+                      className="w-full rounded-xl border-2 border-rose-200 bg-white px-3 py-2 text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
                     />
                   </label>
                   <div className="mt-3 flex justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => setRejectingVolunteerId(null)}
-                      className="h-8 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700"
+                      className="h-8 rounded-xl border border-slate-300 bg-white px-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                     >
-                      Cancel
+                      Hủy
                     </button>
                     <button
                       type="button"
@@ -177,9 +177,9 @@ export function VolunteerAssignmentsSection({
                         busyVolunteerId === assignment.volunteerId
                       }
                       onClick={() => void reject(assignment.volunteerId)}
-                      className="h-8 rounded-lg bg-rose-700 px-3 text-xs font-semibold text-white disabled:bg-slate-300"
+                      className="h-8 rounded-xl bg-rose-600 px-3.5 text-xs font-bold text-white shadow-[0_2px_0_0_#9f1239] hover:bg-rose-500 active:translate-y-0.5 active:shadow-none transition disabled:bg-slate-300 disabled:shadow-none"
                     >
-                      Confirm rejection
+                      Xác nhận từ chối
                     </button>
                   </div>
                 </div>
@@ -188,12 +188,12 @@ export function VolunteerAssignmentsSection({
           ))}
         </div>
       ) : (
-        <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
-          <p className="text-sm font-semibold text-slate-700">
-            No volunteer applications yet
+        <div className="mt-5 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
+          <p className="text-sm font-bold text-slate-700">
+            Chưa có đơn đăng ký tình nguyện nào
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            New applications will appear here.
+            Các tình nguyện viên đăng ký sẽ hiển thị tại đây.
           </p>
         </div>
       )}
@@ -204,5 +204,5 @@ export function VolunteerAssignmentsSection({
 function getErrorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
-    : "Unable to process the volunteer application.";
+    : "Không thể xử lý đơn đăng ký tình nguyện.";
 }

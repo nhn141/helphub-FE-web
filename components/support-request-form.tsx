@@ -93,7 +93,7 @@ export function SupportRequestForm({
       !Number.isFinite(latitude) ||
       !Number.isFinite(longitude)
     ) {
-      setError("Please search for a location or select a point on the map.");
+      setError("Vui lòng tìm kiếm vị trí hoặc chọn một điểm trên bản đồ.");
       return;
     }
 
@@ -123,10 +123,10 @@ export function SupportRequestForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
+      className="rounded-3xl border-2 border-slate-200 bg-white p-5 shadow-sm sm:p-7"
     >
       <div className="grid gap-5 lg:grid-cols-2">
-        <Field label="Request title" className="lg:col-span-2">
+        <Field label="Tiêu đề yêu cầu hỗ trợ" className="lg:col-span-2">
           <input
             required
             maxLength={200}
@@ -134,12 +134,12 @@ export function SupportRequestForm({
             onChange={(event) =>
               setForm({ ...form, title: event.target.value })
             }
-            placeholder="Example: Need help covering medical expenses"
+            placeholder="Ví dụ: Cần hỗ trợ khẩn cấp chi phí y tế và thuốc men"
             className={inputClassName}
           />
         </Field>
 
-        <Field label="Category">
+        <Field label="Danh mục hỗ trợ">
           <select
             required
             disabled={loadingCategories}
@@ -150,7 +150,7 @@ export function SupportRequestForm({
             className={inputClassName}
           >
             <option value="">
-              {loadingCategories ? "Loading categories..." : "Select a category"}
+              {loadingCategories ? "Đang tải danh mục..." : "Chọn danh mục phù hợp"}
             </option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
@@ -160,7 +160,7 @@ export function SupportRequestForm({
           </select>
         </Field>
 
-        <Field label="Detailed description" className="lg:col-span-2">
+        <Field label="Mô tả hoàn cảnh và nhu cầu chi tiết" className="lg:col-span-2">
           <textarea
             required
             rows={7}
@@ -168,12 +168,11 @@ export function SupportRequestForm({
             onChange={(event) =>
               setForm({ ...form, description: event.target.value })
             }
-            placeholder="Describe the situation, needs, and any details supporters should know..."
+            placeholder="Mô tả cụ thể hoàn cảnh, các khó khăn gặp phải và thông tin hỗ trợ cần thiết để cộng đồng nắm rõ..."
             className={`${inputClassName} min-h-40 resize-y py-3`}
           />
           <p className="mt-2 text-xs leading-5 text-slate-500">
-            Do not include passwords, bank account details, or unnecessary
-            sensitive information.
+            Lưu ý: Tuyệt đối không chia sẻ mật khẩu tài khoản, thông tin OTP hoặc dữ liệu riêng tư nhạy cảm.
           </p>
         </Field>
 
@@ -181,7 +180,7 @@ export function SupportRequestForm({
           <LocationPicker
             required
             disabled={submitting}
-            label="Support location"
+            label="Địa điểm cần hỗ trợ"
             value={{
               address: form.address,
               latitude: form.latitude,
@@ -200,21 +199,21 @@ export function SupportRequestForm({
         </div>
       ) : null}
 
-      <div className="mt-6 flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+      <div className="mt-6 flex flex-col-reverse gap-3 border-t-2 border-slate-100 pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onCancel}
           disabled={submitting}
-          className="h-11 rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          className="h-11 rounded-2xl border-2 border-slate-200 bg-white px-5 text-sm font-black text-slate-700 shadow-[0_3px_0_0_#cbd5e1] hover:bg-slate-50 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-60"
         >
-          Cancel
+          Hủy bỏ
         </button>
         <button
           type="submit"
           disabled={submitting || loadingCategories || !categories.length}
-          className="h-11 rounded-xl bg-emerald-700 px-6 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="h-11 rounded-2xl bg-emerald-600 px-6 text-sm font-black text-white shadow-[0_4px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-1 active:shadow-none transition-all disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >
-          {submitting ? "Saving..." : submitLabel}
+          {submitting ? "Đang lưu..." : submitLabel}
         </button>
       </div>
     </form>
@@ -232,7 +231,7 @@ function Field({
 }) {
   return (
     <label className={className}>
-      <span className="mb-2 block text-sm font-semibold text-slate-700">
+      <span className="mb-2 block text-sm font-bold text-slate-800">
         {label}
       </span>
       {children}
@@ -241,8 +240,8 @@ function Field({
 }
 
 const inputClassName =
-  "h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100";
+  "h-11 w-full rounded-2xl border-2 border-slate-200 bg-white px-3.5 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100";
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unable to save the request.";
+  return error instanceof Error ? error.message : "Không thể lưu thông tin yêu cầu.";
 }

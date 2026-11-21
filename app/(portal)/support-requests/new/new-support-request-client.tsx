@@ -17,7 +17,7 @@ export default function NewSupportRequestClient() {
   if (profile.role !== "REQUESTER") {
     return (
       <Notice type="error">
-        Only requester accounts can create support requests.
+        Chỉ tài khoản người cần hỗ trợ (Requester) mới có thể tạo yêu cầu hỗ trợ.
       </Notice>
     );
   }
@@ -31,12 +31,12 @@ export default function NewSupportRequestClient() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeading
-        eyebrow="Step 1"
-        title="Create a support request"
-        description="Start with the request overview. After creating it, you can add specific needs such as money, food, or supplies."
+        eyebrow="Bước 1"
+        title="Tạo yêu cầu hỗ trợ"
+        description="Bắt đầu với thông tin tổng quan của đợt hỗ trợ. Sau khi tạo thành công, bạn có thể bổ sung danh sách các nhu cầu cụ thể như tiền mặt, lương thực hoặc vật tư y tế."
       />
       <SupportRequestForm
-        submitLabel="Create request"
+        submitLabel="Tạo yêu cầu"
         onSubmit={handleSubmit}
         onCancel={() => router.push("/support-requests")}
       />

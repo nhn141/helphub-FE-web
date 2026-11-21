@@ -82,7 +82,7 @@ export function AdminSupportRequestsClient() {
     const handleApprove = async (id: string) => {
         if (
             !window.confirm(
-                "Approve this support request? It will become visible to the community.",
+                "Phê duyệt yêu cầu hỗ trợ này? Yêu cầu sẽ hiển thị công khai tới cộng đồng.",
             )
         )
             return;
@@ -93,7 +93,7 @@ export function AdminSupportRequestsClient() {
             await approveSupportRequest(token, id);
             fetchRequests();
         } catch (err: any) {
-            alert(`Failed to approve: ${err.message}`);
+            alert(`Lỗi khi phê duyệt: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
@@ -101,11 +101,11 @@ export function AdminSupportRequestsClient() {
 
     const handleReject = async (id: string) => {
         const reason = window.prompt(
-            "Please enter the reason for rejection (required):",
+            "Vui lòng nhập lý do từ chối (bắt buộc):",
         );
         if (reason === null) return;
         if (!reason.trim()) {
-            alert("Rejection reason cannot be empty.");
+            alert("Lý do từ chối không được để trống.");
             return;
         }
 
@@ -117,7 +117,7 @@ export function AdminSupportRequestsClient() {
             });
             fetchRequests();
         } catch (err: any) {
-            alert(`Failed to reject: ${err.message}`);
+            alert(`Lỗi khi từ chối: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
@@ -131,10 +131,10 @@ export function AdminSupportRequestsClient() {
             await assignSupportLocationToRequest(token, id, {
                 supportLocationId: locationId,
             });
-            alert("Support location assigned successfully!");
+            alert("Đã chỉ định trạm tiếp nhận thành công!");
             fetchRequests();
         } catch (err: any) {
-            alert(`Failed to assign location: ${err.message}`);
+            alert(`Lỗi khi chỉ định trạm: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
@@ -143,12 +143,12 @@ export function AdminSupportRequestsClient() {
     return (
         <>
             <PageHeading
-                eyebrow="Moderation"
-                title="Support Requests"
-                description="Review incoming requests, approve valid needs, and assign drop-off locations."
+                eyebrow="Kiểm duyệt & Điều phối"
+                title="Quản lý yêu cầu hỗ trợ"
+                description="Xét duyệt các yêu cầu hỗ trợ gửi đến, xác minh hoàn cảnh và chỉ định trạm tiếp nhận nguồn lực."
             />
 
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border-2 border-slate-200 shadow-sm overflow-hidden">
                 <SupportRequestFilters
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
@@ -166,13 +166,13 @@ export function AdminSupportRequestsClient() {
 
                 {loading ? (
                     <div className="py-10">
-                        <LoadingBlock />
+                        <LoadingBlock message="Đang tải danh sách yêu cầu..." />
                     </div>
                 ) : requests.length === 0 ? (
                     <div className="py-8 border-t border-slate-100">
                         <EmptyState
-                            title="No requests found"
-                            description="Try changing your filters."
+                            title="Không tìm thấy yêu cầu nào"
+                            description="Hãy thử thay đổi điều kiện lọc trạng thái hoặc danh mục."
                         />
                     </div>
                 ) : (

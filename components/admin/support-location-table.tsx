@@ -18,16 +18,16 @@ export function SupportLocationTable({
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
+                <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-bold border-b border-slate-200">
                     <tr>
                         <th className="px-5 py-3 min-w-[200px]">
-                            Location Info
+                            Thông tin trạm
                         </th>
                         <th className="px-5 py-3 min-w-[200px]">
-                            Address & Contact
+                            Địa chỉ & Liên hệ
                         </th>
-                        <th className="px-5 py-3">Status</th>
-                        <th className="px-5 py-3 text-right">Actions</th>
+                        <th className="px-5 py-3">Trạng thái</th>
+                        <th className="px-5 py-3 text-right">Hành động</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -40,7 +40,7 @@ export function SupportLocationTable({
                                 className="hover:bg-slate-50 transition"
                             >
                                 <td className="px-5 py-3 align-top">
-                                    <p className="font-semibold text-slate-900">
+                                    <p className="font-bold text-slate-900">
                                         {loc.name}
                                     </p>
                                     <p
@@ -51,41 +51,33 @@ export function SupportLocationTable({
                                     </p>
                                     {(loc.bankName ||
                                         loc.bankAccountNumber) && (
-                                        <div className="mt-2 inline-block rounded bg-slate-100 p-1.5 text-[0px] font-medium text-slate-600">
-                                            <span className="text-[11px]">
-                                                Bank: {loc.bankName || "N/A"} -{" "}
-                                                {loc.bankAccountNumber || "N/A"}
-                                            </span>
-                                            🏦 {loc.bankName} -{" "}
-                                            {loc.bankAccountNumber}
+                                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+                                            <span>🏦 {loc.bankName || "Ngân hàng"}</span>
+                                            <span>- {loc.bankAccountNumber}</span>
                                         </div>
                                     )}
                                 </td>
 
                                 <td className="px-5 py-3 align-top">
-                                    <p className="text-sm text-slate-700">
+                                    <p className="text-sm font-medium text-slate-700">
                                         {loc.address}
                                     </p>
-                                    <p className="mt-1 text-[0px] font-semibold text-emerald-700">
-                                        <span className="text-xs">
-                                            Phone: {loc.contactPhone}
-                                        </span>
-                                        📞 {loc.contactPhone}
+                                    <p className="mt-1 text-xs font-bold text-emerald-700">
+                                        📞 Hotline: {loc.contactPhone}
                                     </p>
                                     <p className="text-[10px] text-slate-400 mt-1 font-mono">
-                                        Lat: {loc.latitude} | Lng:{" "}
-                                        {loc.longitude}
+                                        Vĩ độ: {loc.latitude} | Kinh độ: {loc.longitude}
                                     </p>
                                 </td>
 
                                 <td className="px-5 py-3 align-top">
                                     <span
-                                        className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${loc.isActive ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}
+                                        className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${loc.isActive ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"}`}
                                     >
                                         <span
                                             className={`size-1.5 rounded-full ${loc.isActive ? "bg-emerald-500" : "bg-rose-500"}`}
                                         ></span>
-                                        {loc.isActive ? "Active" : "Inactive"}
+                                        {loc.isActive ? "Đang hoạt động" : "Tạm dừng"}
                                     </span>
                                 </td>
 
@@ -94,9 +86,9 @@ export function SupportLocationTable({
                                         <button
                                             onClick={() => onEdit(loc)}
                                             disabled={isProcessing}
-                                            className="text-xs font-semibold px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded transition disabled:opacity-50"
+                                            className="text-xs font-bold px-3 py-1.5 text-emerald-700 hover:bg-emerald-50 rounded-lg transition disabled:opacity-50 cursor-pointer"
                                         >
-                                            Edit
+                                            Sửa
                                         </button>
                                         <button
                                             onClick={() =>
@@ -106,14 +98,14 @@ export function SupportLocationTable({
                                                 )
                                             }
                                             disabled={isProcessing}
-                                            className={`text-xs font-semibold px-3 py-1.5 rounded transition disabled:opacity-50
-                        ${loc.isActive ? "text-rose-600 hover:bg-rose-50" : "text-emerald-600 hover:bg-emerald-50"}`}
+                                            className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:opacity-50 cursor-pointer
+                        ${loc.isActive ? "text-rose-600 hover:bg-rose-50" : "text-emerald-700 hover:bg-emerald-50"}`}
                                         >
                                             {isProcessing
-                                                ? "Wait..."
+                                                ? "Đang xử lý..."
                                                 : loc.isActive
-                                                  ? "Deactivate"
-                                                  : "Activate"}
+                                                  ? "Ngừng hoạt động"
+                                                  : "Kích hoạt"}
                                         </button>
                                     </div>
                                 </td>

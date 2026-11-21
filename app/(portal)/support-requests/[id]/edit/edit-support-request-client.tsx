@@ -36,12 +36,12 @@ export default function EditSupportRequestClient({
       const request = await getSupportRequest(token, supportRequestId);
 
       if (request.requesterId !== profile.id) {
-        setError("You can only edit requests that you created.");
+        setError("Bạn chỉ có thể chỉnh sửa yêu cầu do chính bạn tạo.");
         return;
       }
 
       if (request.status !== "PENDING") {
-        setError("Only requests pending review can be edited.");
+        setError("Chỉ các yêu cầu đang chờ duyệt mới có thể chỉnh sửa.");
         return;
       }
 
@@ -67,7 +67,7 @@ export default function EditSupportRequestClient({
   }, [loadRequest]);
 
   if (profile.role !== "REQUESTER") {
-    return <Notice type="error">You do not have permission to edit this request.</Notice>;
+    return <Notice type="error">Bạn không có quyền chỉnh sửa yêu cầu này.</Notice>;
   }
 
   if (error) {
@@ -75,7 +75,7 @@ export default function EditSupportRequestClient({
   }
 
   if (!initialValue) {
-    return <LoadingBlock message="Loading request details..." />;
+    return <LoadingBlock message="Đang tải chi tiết yêu cầu..." />;
   }
 
   async function handleSubmit(payload: SupportRequestPayload) {
@@ -87,13 +87,13 @@ export default function EditSupportRequestClient({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeading
-        eyebrow="Update details"
-        title="Edit support request"
-        description="Changes are allowed while the request is still pending review."
+        eyebrow="Cập nhật thông tin"
+        title="Chỉnh sửa yêu cầu hỗ trợ"
+        description="Bạn có thể chỉnh sửa các thông tin khi yêu cầu vẫn đang trong trạng thái chờ xét duyệt."
       />
       <SupportRequestForm
         initialValue={initialValue}
-        submitLabel="Save changes"
+        submitLabel="Lưu thay đổi"
         onSubmit={handleSubmit}
         onCancel={() =>
           router.push(`/support-requests/${supportRequestId}`)
@@ -106,5 +106,5 @@ export default function EditSupportRequestClient({
 function getErrorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
-    : "Unable to load request details.";
+    : "Không thể tải thông tin yêu cầu.";
 }

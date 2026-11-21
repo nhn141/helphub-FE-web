@@ -65,7 +65,7 @@ export function SupportLocationsClient() {
     if (!canManage) {
         return (
             <Notice type="error">
-                Only admins and collaborators can manage support locations.
+                Chỉ Quản trị viên và Điều phối viên mới có quyền quản lý trạm tiếp nhận hỗ trợ.
             </Notice>
         );
     }
@@ -81,11 +81,11 @@ export function SupportLocationsClient() {
     };
 
     const handleToggleStatus = async (id: string, currentStatus: boolean) => {
-        const action = currentStatus ? "deactivate" : "activate";
+        const action = currentStatus ? "ngừng hoạt động" : "kích hoạt lại";
 
         if (
             !window.confirm(
-                `Are you sure you want to ${action} this support location?`,
+                `Bạn có chắc chắn muốn ${action} trạm tiếp nhận hỗ trợ này?`,
             )
         ) {
             return;
@@ -108,9 +108,8 @@ export function SupportLocationsClient() {
                 ),
             );
             setSuccess(
-                `Support location ${
-                    currentStatus ? "deactivated" : "activated"
-                } successfully.`,
+                `Đã ${currentStatus ? "ngừng hoạt động" : "kích hoạt"
+                } trạm tiếp nhận thành công.`,
             );
         } catch (statusError) {
             setError(getErrorMessage(statusError));
@@ -142,11 +141,11 @@ export function SupportLocationsClient() {
                             : location,
                     ),
                 );
-                setSuccess("Support location updated successfully.");
+                setSuccess("Đã cập nhật thông tin trạm tiếp nhận thành công.");
             } else {
                 const newLocation = await createSupportLocation(token, payload);
                 setLocations((current) => [newLocation, ...current]);
-                setSuccess("Support location created successfully.");
+                setSuccess("Đã tạo trạm tiếp nhận mới thành công.");
             }
 
             setIsModalOpen(false);
@@ -161,16 +160,16 @@ export function SupportLocationsClient() {
     return (
         <div className="space-y-6">
             <PageHeading
-                eyebrow="Support locations"
-                title="Manage support locations"
-                description="Create physical hubs, warehouses, and drop-off points that can be assigned to approved support requests."
+                eyebrow="Trạm tiếp nhận"
+                title="Quản lý trạm tiếp nhận hỗ trợ"
+                description="Thiết lập các trạm, kho lưu trữ và điểm tập kết nguồn lực để điều phối cho các yêu cầu hỗ trợ đã duyệt."
                 action={
                     <button
                         type="button"
                         onClick={openCreateModal}
-                        className="inline-flex h-11 items-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                        className="inline-flex h-11 items-center rounded-2xl bg-emerald-600 px-5 text-sm font-black text-white shadow-[0_4px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-1 active:shadow-none transition-all cursor-pointer"
                     >
-                        New location
+                        + Thêm trạm mới
                     </button>
                 }
             />
@@ -178,10 +177,10 @@ export function SupportLocationsClient() {
             {error ? <Notice type="error">{error}</Notice> : null}
             {success ? <Notice type="success">{success}</Notice> : null}
 
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <section className="overflow-hidden rounded-3xl border-2 border-slate-200 bg-white shadow-sm">
                 {loading ? (
                     <div className="py-10">
-                        <LoadingBlock message="Loading support locations..." />
+                        <LoadingBlock message="Đang tải danh sách trạm tiếp nhận..." />
                     </div>
                 ) : locations.length ? (
                     <SupportLocationTable
@@ -193,8 +192,8 @@ export function SupportLocationsClient() {
                 ) : (
                     <div className="border-t border-slate-100 py-8">
                         <EmptyState
-                            title="No support locations yet"
-                            description="Create your first support location so coordinators can assign it to approved requests."
+                            title="Chưa có trạm tiếp nhận nào"
+                            description="Tạo trạm tiếp nhận đầu tiên để điều phối viên có thể chỉ định trạm cho các yêu cầu đã phê duyệt."
                         />
                     </div>
                 )}
@@ -217,5 +216,5 @@ export function SupportLocationsClient() {
 function getErrorMessage(error: unknown) {
     return error instanceof Error
         ? error.message
-        : "Unable to update support locations.";
+        : "Không thể cập nhật thông tin trạm tiếp nhận.";
 }

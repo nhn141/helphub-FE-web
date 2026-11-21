@@ -64,7 +64,7 @@ export default function ProfilePage() {
                 }
             } catch (err) {
                 console.error(err);
-                if (isMounted) setError("Failed to load profile information.");
+                if (isMounted) setError("Không thể tải thông tin hồ sơ.");
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -92,7 +92,7 @@ export default function ProfilePage() {
                 process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
             if (!cloudName || !uploadPreset) {
-                throw new Error("Cloudinary configuration is missing.");
+                throw new Error("Chưa cấu hình Cloudinary.");
             }
 
             const uploadData = new FormData();
@@ -107,14 +107,14 @@ export default function ProfilePage() {
                 },
             );
 
-            if (!res.ok) throw new Error("Failed to upload image");
+            if (!res.ok) throw new Error("Không thể tải ảnh lên");
 
             const data = await res.json();
             setFormData((prev) => ({ ...prev, avatarUrl: data.secure_url }));
         } catch (err: any) {
             console.error(err);
             setError(
-                "Failed to upload image. Please check your connection or configuration.",
+                "Tải ảnh lên thất bại. Vui lòng kiểm tra lại kết nối mạng.",
             );
         } finally {
             setIsUploadingAvatar(false);
@@ -127,7 +127,7 @@ export default function ProfilePage() {
     const handleSaveProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.fullName.trim()) {
-            setError("Full name cannot be empty.");
+            setError("Họ và tên không được để trống.");
             return;
         }
 
@@ -147,7 +147,7 @@ export default function ProfilePage() {
         } catch (err: any) {
             console.error(err);
             setError(
-                err.message || "Failed to update profile. Please try again.",
+                err.message || "Cập nhật hồ sơ thất bại. Vui lòng thử lại.",
             );
         } finally {
             setIsSaving(false);
@@ -157,7 +157,7 @@ export default function ProfilePage() {
     const handleUpgradeSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!upgradeReason.trim()) {
-            setUpgradeError("Reason is required.");
+            setUpgradeError("Vui lòng nhập lý do xin nâng cấp vai trò.");
             return;
         }
 
@@ -177,7 +177,7 @@ export default function ProfilePage() {
             setUpgradeDocsUrl("");
         } catch (err: any) {
             console.error(err);
-            setUpgradeError(err.message || "Failed to submit upgrade request.");
+            setUpgradeError(err.message || "Gửi yêu cầu nâng cấp thất bại.");
         } finally {
             setIsSubmittingUpgrade(false);
         }
@@ -193,8 +193,8 @@ export default function ProfilePage() {
 
     if (!profile) {
         return (
-            <div className="p-8 text-center text-slate-500">
-                Profile information not found.
+            <div className="p-8 text-center text-slate-500 font-bold">
+                Không tìm thấy thông tin hồ sơ người dùng.
             </div>
         );
     }
@@ -207,27 +207,27 @@ export default function ProfilePage() {
     return (
         <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-slate-900">
-                    User Profile
+                <h1 className="text-2xl font-black text-slate-900">
+                    Hồ sơ cá nhân
                 </h1>
-                <p className="text-sm text-slate-500">
-                    Manage your profile information and account settings.
+                <p className="text-sm font-semibold text-slate-500 mt-1">
+                    Quản lý thông tin tài khoản và phân quyền của bạn trên HelpHub.
                 </p>
             </div>
 
             {error && (
-                <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm">
+                <div className="p-4 bg-rose-50 border-2 border-rose-200 text-rose-800 rounded-2xl text-sm font-bold shadow-[0_2px_0_0_#fecdd3]">
                     {error}
                 </div>
             )}
 
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="bg-slate-50 px-6 py-8 border-b border-slate-200 flex flex-col md:flex-row items-center gap-6">
-                    <div className="relative size-24 rounded-full bg-emerald-100 border-4 border-white shadow-sm flex items-center justify-center text-3xl font-bold text-emerald-700 overflow-hidden shrink-0">
+            <div className="bg-white border-2 border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+                <div className="bg-slate-50 px-6 py-8 border-b-2 border-slate-200 flex flex-col md:flex-row items-center gap-6">
+                    <div className="relative size-24 rounded-full bg-emerald-100 border-4 border-white shadow-md flex items-center justify-center text-3xl font-black text-emerald-800 overflow-hidden shrink-0">
                         {displayAvatar ? (
                             <img
                                 src={displayAvatar}
-                                alt="Avatar"
+                                alt="Ảnh đại diện"
                                 className="size-full object-cover"
                             />
                         ) : (
@@ -240,22 +240,22 @@ export default function ProfilePage() {
                         )}
                     </div>
                     <div className="text-center md:text-left flex-1">
-                        <h2 className="text-xl font-bold text-slate-900">
+                        <h2 className="text-xl font-black text-slate-900">
                             {profile.fullName}
                         </h2>
-                        <p className="text-slate-500 text-sm mb-2">
+                        <p className="text-slate-500 font-medium text-sm mb-2">
                             {profile.email}
                         </p>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                            {profile.role}
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            {profile.role === "REQUESTER" ? "Người cần hỗ trợ" : profile.role === "VOLUNTEER" ? "Tình nguyện viên" : profile.role === "ADMIN" ? "Quản trị viên" : "Cộng tác viên"}
                         </span>
                     </div>
                     {!isEditing && (
                         <button
                             onClick={() => setIsEditing(true)}
-                            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm"
+                            className="px-5 py-2.5 bg-white border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition shadow-[0_2px_0_0_#cbd5e1] active:translate-y-0.5 active:shadow-none cursor-pointer"
                         >
-                            Edit Profile
+                            Chỉnh sửa hồ sơ
                         </button>
                     )}
                 </div>
@@ -268,8 +268,8 @@ export default function ProfilePage() {
                         >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                                        Full Name{" "}
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">
+                                        Họ và tên{" "}
                                         <span className="text-rose-500">*</span>
                                     </label>
                                     <input
@@ -283,27 +283,28 @@ export default function ProfilePage() {
                                                 fullName: e.target.value,
                                             })
                                         }
-                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                                        className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white font-medium text-sm transition"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                                        Email
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">
+                                        Địa chỉ Email
                                     </label>
                                     <input
                                         type="email"
                                         disabled
                                         value={profile.email}
-                                        className="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed"
+                                        className="w-full px-4 py-2.5 bg-slate-100 border-2 border-slate-200 rounded-xl text-slate-500 cursor-not-allowed font-medium text-sm"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                                        Phone Number
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">
+                                        Số điện thoại liên hệ
                                     </label>
                                     <input
                                         type="tel"
                                         disabled={isSaving}
+                                        placeholder="0912 345 678"
                                         value={formData.phone || ""}
                                         onChange={(e) =>
                                             setFormData({
@@ -311,12 +312,12 @@ export default function ProfilePage() {
                                                 phone: e.target.value,
                                             })
                                         }
-                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                                        className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white font-medium text-sm transition"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                                        Avatar Image
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">
+                                        Ảnh đại diện
                                     </label>
                                     <div className="flex items-center gap-3">
                                         <input
@@ -337,11 +338,11 @@ export default function ProfilePage() {
                                             disabled={
                                                 isSaving || isUploadingAvatar
                                             }
-                                            className="px-4 py-2 w-full bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                            className="px-4 py-2.5 w-full bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-100 transition focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                                         >
                                             {isUploadingAvatar
-                                                ? "Uploading Image..."
-                                                : "Choose from device"}
+                                                ? "Đang tải ảnh lên..."
+                                                : "Chọn ảnh từ thiết bị"}
                                         </button>
                                     </div>
                                 </div>
@@ -360,9 +361,9 @@ export default function ProfilePage() {
                                         });
                                     }}
                                     disabled={isSaving || isUploadingAvatar}
-                                    className="px-5 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition"
+                                    className="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition cursor-pointer"
                                 >
-                                    Cancel
+                                    Hủy
                                 </button>
                                 <button
                                     type="submit"
@@ -371,9 +372,9 @@ export default function ProfilePage() {
                                         isUploadingAvatar ||
                                         !formData.fullName.trim()
                                     }
-                                    className="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition flex items-center gap-2"
+                                    className="px-5 py-2.5 text-sm font-black text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-[0_3px_0_0_#065f46] active:translate-y-0.5 active:shadow-none transition flex items-center gap-2 cursor-pointer"
                                 >
-                                    {isSaving ? "Saving..." : "Save Changes"}
+                                    {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
                                 </button>
                             </div>
                         </form>
@@ -381,41 +382,41 @@ export default function ProfilePage() {
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                                 <div>
-                                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                                        Full Name
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                        Họ và tên
                                     </h3>
-                                    <p className="text-slate-800 font-medium">
+                                    <p className="text-slate-900 font-bold">
                                         {profile.fullName}
                                     </p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                                        Email
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                        Địa chỉ Email
                                     </h3>
-                                    <p className="text-slate-800 font-medium">
+                                    <p className="text-slate-900 font-bold">
                                         {profile.email}
                                     </p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                                        Phone Number
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                        Số điện thoại liên hệ
                                     </h3>
-                                    <p className="text-slate-800 font-medium">
+                                    <p className="text-slate-900 font-bold">
                                         {profile.phone || (
-                                            <span className="text-slate-400 italic">
-                                                Not updated
+                                            <span className="text-slate-400 italic font-normal">
+                                                Chưa cập nhật
                                             </span>
                                         )}
                                     </p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                                        Joined Date
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                        Ngày tham gia
                                     </h3>
-                                    <p className="text-slate-800 font-medium">
+                                    <p className="text-slate-900 font-bold">
                                         {new Date(
                                             profile.createdAt,
-                                        ).toLocaleDateString("en-US", {
+                                        ).toLocaleDateString("vi-VN", {
                                             year: "numeric",
                                             month: "long",
                                             day: "numeric",
@@ -423,19 +424,19 @@ export default function ProfilePage() {
                                     </p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                                        Account Status
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                        Trạng thái tài khoản
                                     </h3>
                                     <div className="mt-1">
                                         {profile.isActive ? (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
-                                                <span className="size-1.5 rounded-full bg-emerald-500"></span>
-                                                Active
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <span className="size-2 rounded-full bg-emerald-500"></span>
+                                                Đang hoạt động
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium bg-rose-50 text-rose-700">
-                                                <span className="size-1.5 rounded-full bg-rose-500"></span>
-                                                Inactive
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                <span className="size-2 rounded-full bg-rose-500"></span>
+                                                Ngưng hoạt động
                                             </span>
                                         )}
                                     </div>
@@ -446,14 +447,14 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="px-6 py-5 border-b border-slate-200 flex justify-between items-center">
+            <div className="bg-white border-2 border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+                <div className="px-6 py-5 border-b-2 border-slate-200 flex justify-between items-center">
                     <div>
-                        <h2 className="text-lg font-bold text-slate-900">
-                            Role Management
+                        <h2 className="text-lg font-black text-slate-900">
+                            Quản lý vai trò & Phân quyền
                         </h2>
-                        <p className="text-sm text-slate-500 mt-1">
-                            View or request upgrades to your system privileges.
+                        <p className="text-sm font-semibold text-slate-500 mt-1">
+                            Xem vai trò hiện tại hoặc gửi yêu cầu nâng cấp quyền hạn tài khoản.
                         </p>
                     </div>
                     {profile.role === "VOLUNTEER" &&
@@ -461,9 +462,9 @@ export default function ProfilePage() {
                         !showUpgradeForm && (
                             <button
                                 onClick={() => setShowUpgradeForm(true)}
-                                className="px-4 py-2 bg-emerald-50 text-emerald-700 font-semibold text-sm rounded-lg hover:bg-emerald-100 transition"
+                                className="px-4 py-2 bg-emerald-50 border-2 border-emerald-200 text-emerald-800 font-black text-xs rounded-xl hover:bg-emerald-100 transition shadow-[0_2px_0_0_#a7f3d0] cursor-pointer"
                             >
-                                Request Upgrade
+                                + Yêu cầu nâng cấp
                             </button>
                         )}
                 </div>
@@ -472,19 +473,19 @@ export default function ProfilePage() {
                     {showUpgradeForm ? (
                         <form
                             onSubmit={handleUpgradeSubmit}
-                            className="space-y-4 mb-8 bg-slate-50 p-5 rounded-xl border border-slate-200"
+                            className="space-y-4 mb-8 bg-slate-50 p-5 rounded-2xl border-2 border-slate-200"
                         >
-                            <h3 className="font-semibold text-slate-800">
-                                Submit Upgrade Request
+                            <h3 className="font-black text-slate-900">
+                                Gửi yêu cầu nâng cấp vai trò
                             </h3>
                             {upgradeError && (
-                                <div className="p-3 bg-rose-50 text-rose-700 text-sm rounded-lg border border-rose-200">
+                                <div className="p-3 bg-rose-50 text-rose-800 text-sm font-bold rounded-xl border border-rose-200">
                                     {upgradeError}
                                 </div>
                             )}
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Reason for Upgrade{" "}
+                                <label className="block text-sm font-bold text-slate-700 mb-1">
+                                    Lý do xin nâng cấp vai trò{" "}
                                     <span className="text-rose-500">*</span>
                                 </label>
                                 <textarea
@@ -495,13 +496,13 @@ export default function ProfilePage() {
                                     onChange={(e) =>
                                         setUpgradeReason(e.target.value)
                                     }
-                                    placeholder="Explain why you are requesting a higher role..."
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                                    placeholder="Nêu rõ kinh nghiệm hoặc lý do bạn mong muốn nâng cấp vai trò..."
+                                    className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none font-medium text-sm"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Supporting Documents URL
+                                <label className="block text-sm font-bold text-slate-700 mb-1">
+                                    Đường dẫn tài liệu chứng minh (nếu có)
                                 </label>
                                 <input
                                     type="url"
@@ -510,8 +511,8 @@ export default function ProfilePage() {
                                     onChange={(e) =>
                                         setUpgradeDocsUrl(e.target.value)
                                     }
-                                    placeholder="https://link-to-your-credentials.com"
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    placeholder="https://link-chung-chi-hoac-ho-so.com"
+                                    className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-sm"
                                 />
                             </div>
                             <div className="flex justify-end gap-3 pt-2">
@@ -522,9 +523,9 @@ export default function ProfilePage() {
                                         setUpgradeError(null);
                                     }}
                                     disabled={isSubmittingUpgrade}
-                                    className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                                    className="px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition cursor-pointer"
                                 >
-                                    Cancel
+                                    Hủy
                                 </button>
                                 <button
                                     type="submit"
@@ -532,11 +533,11 @@ export default function ProfilePage() {
                                         isSubmittingUpgrade ||
                                         !upgradeReason.trim()
                                     }
-                                    className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition"
+                                    className="px-5 py-2 text-sm font-black text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-[0_3px_0_0_#065f46] transition cursor-pointer disabled:opacity-50"
                                 >
                                     {isSubmittingUpgrade
-                                        ? "Submitting..."
-                                        : "Submit Request"}
+                                        ? "Đang gửi..."
+                                        : "Gửi yêu cầu"}
                                 </button>
                             </div>
                         </form>
@@ -544,42 +545,42 @@ export default function ProfilePage() {
 
                     {upgradeRequests.length > 0 ? (
                         <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
-                                Request History
+                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                                Lịch sử yêu cầu nâng cấp
                             </h3>
                             {upgradeRequests.map((req) => (
                                 <div
                                     key={req.id}
-                                    className="p-4 border border-slate-200 rounded-xl bg-white"
+                                    className="p-4 border-2 border-slate-200 rounded-2xl bg-white shadow-xs"
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs text-slate-500 font-medium">
+                                        <span className="text-xs text-slate-500 font-bold">
                                             {new Date(
                                                 req.createdAt,
-                                            ).toLocaleDateString("en-US", {
+                                            ).toLocaleDateString("vi-VN", {
                                                 year: "numeric",
                                                 month: "short",
                                                 day: "numeric",
                                             })}
                                         </span>
                                         <span
-                                            className={`text-[10px] uppercase font-bold px-2 py-1 rounded ${
+                                            className={`text-[10px] uppercase font-black px-2.5 py-1 rounded-full border ${
                                                 req.status === "APPROVED"
-                                                    ? "bg-emerald-100 text-emerald-800"
+                                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                                                     : req.status === "REJECTED"
-                                                      ? "bg-rose-100 text-rose-800"
+                                                      ? "bg-rose-50 text-rose-800 border-rose-200"
                                                       : req.status ===
                                                           "CANCELLED"
-                                                        ? "bg-slate-100 text-slate-600"
-                                                        : "bg-amber-100 text-amber-800"
+                                                        ? "bg-slate-100 text-slate-600 border-slate-200"
+                                                        : "bg-amber-50 text-amber-800 border-amber-200"
                                             }`}
                                         >
-                                            {req.status}
+                                            {req.status === "APPROVED" ? "Đã duyệt" : req.status === "REJECTED" ? "Từ chối" : req.status === "CANCELLED" ? "Đã hủy" : "Đang chờ duyệt"}
                                         </span>
                                     </div>
-                                    <p className="text-sm text-slate-800">
-                                        <span className="font-semibold text-slate-600">
-                                            Reason:
+                                    <p className="text-sm text-slate-800 font-medium">
+                                        <span className="font-bold text-slate-600">
+                                            Lý do:
                                         </span>{" "}
                                         {req.reason}
                                     </p>
@@ -588,15 +589,15 @@ export default function ProfilePage() {
                                             href={req.supportingDocumentsUrl}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="text-xs text-blue-600 hover:underline mt-1 block truncate"
+                                            className="text-xs text-emerald-600 font-bold hover:underline mt-1.5 block truncate"
                                         >
-                                            Supporting Documents
+                                            Xem tài liệu chứng minh đính kèm &rarr;
                                         </a>
                                     )}
                                     {req.rejectionReason && (
-                                        <div className="mt-3 p-2 bg-rose-50 text-rose-700 text-xs rounded border border-rose-100">
+                                        <div className="mt-3 p-3 bg-rose-50 text-rose-800 text-xs rounded-xl border border-rose-200 font-medium">
                                             <span className="font-bold">
-                                                Rejection Note:
+                                                Lý do từ chối:
                                             </span>{" "}
                                             {req.rejectionReason}
                                         </div>
@@ -605,8 +606,8 @@ export default function ProfilePage() {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm text-slate-500 text-center py-4">
-                            No role upgrade requests found.
+                        <p className="text-sm font-semibold text-slate-400 text-center py-4">
+                            Chưa có yêu cầu nâng cấp vai trò nào.
                         </p>
                     )}
                 </div>

@@ -178,7 +178,7 @@ export default function SupportRequestsClient() {
     try {
       const token = await getAccessToken();
       await assignSupportLocation(token, supportRequestId, supportLocationId);
-      setSuccess("Support location assigned successfully.");
+      setSuccess("Đã chỉ định trạm tiếp nhận thành công.");
       await loadData();
     } catch (assignError) {
       setError(getErrorMessage(assignError));
@@ -190,16 +190,16 @@ export default function SupportRequestsClient() {
   return (
     <div className="space-y-6">
       <PageHeading
-        eyebrow="Support requests"
+        eyebrow="Yêu cầu hỗ trợ"
         title={getPageTitle(profile.role)}
         description={getPageDescription(profile.role)}
         action={
           profile.role === "REQUESTER" ? (
             <Link
               href="/support-requests/new"
-              className="inline-flex h-11 items-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white hover:bg-emerald-800"
+              className="inline-flex h-11 items-center rounded-2xl bg-emerald-600 px-5 text-sm font-black text-white shadow-[0_4px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-1 active:shadow-none transition-all"
             >
-              Create request
+              + Tạo yêu cầu mới
             </Link>
           ) : null
         }
@@ -213,7 +213,7 @@ export default function SupportRequestsClient() {
             className="font-semibold underline"
             onClick={() => void loadData()}
           >
-            Try again
+            Thử lại
           </button>
         </Notice>
       ) : null}
@@ -228,8 +228,8 @@ export default function SupportRequestsClient() {
               className={tabClassName(view === "primary")}
             >
               {profile.role === "REQUESTER"
-                ? "My requests"
-                : "Seeking support"}
+                ? "Yêu cầu của tôi"
+                : "Đang tìm kiếm hỗ trợ"}
             </button>
             <button
               type="button"
@@ -237,8 +237,8 @@ export default function SupportRequestsClient() {
               className={tabClassName(view === "secondary")}
             >
               {profile.role === "REQUESTER"
-                ? "Community requests"
-                : "My assignments"}
+                ? "Yêu cầu cộng đồng"
+                : "Nhiệm vụ của tôi"}
             </button>
           </div>
         )}
@@ -246,12 +246,12 @@ export default function SupportRequestsClient() {
         {!showAssignments ? (
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <label className="relative block w-full xl:max-w-sm">
-              <span className="sr-only">Search requests</span>
+              <span className="sr-only">Tìm kiếm yêu cầu</span>
               <SearchIcon />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search by title, category, or address..."
+                placeholder="Tìm theo tiêu đề, danh mục, địa chỉ..."
                 className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
               />
             </label>
@@ -261,14 +261,13 @@ export default function SupportRequestsClient() {
                   key={status}
                   type="button"
                   onClick={() => setStatusFilter(status)}
-                  className={`h-9 shrink-0 rounded-lg border px-3 text-xs font-semibold transition ${
-                    statusFilter === status
+                  className={`h-9 shrink-0 rounded-lg border px-3 text-xs font-semibold transition ${statusFilter === status
                       ? "border-emerald-700 bg-emerald-700 text-white"
                       : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300"
-                  }`}
+                    }`}
                 >
                   {status === "ALL"
-                    ? "All"
+                    ? "Tất cả"
                     : SUPPORT_REQUEST_STATUS_LABELS[status]}
                 </button>
               ))}
@@ -278,7 +277,7 @@ export default function SupportRequestsClient() {
       </section>
 
       {loading ? (
-        <LoadingBlock />
+        <LoadingBlock message="Đang tải danh sách yêu cầu hỗ trợ..." />
       ) : showAssignments ? (
         assignments.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -300,26 +299,26 @@ export default function SupportRequestsClient() {
                   {assignment.supportRequestTitle}
                 </Link>
                 <p className="mt-2 text-sm text-slate-500">
-                  Requester: {assignment.requesterName}
+                  Người yêu cầu: {assignment.requesterName}
                 </p>
                 {assignment.rejectionReason ? (
                   <p className="mt-3 rounded-lg bg-rose-50 p-3 text-sm text-rose-800">
-                    Reason: {assignment.rejectionReason}
+                    Lý do: {assignment.rejectionReason}
                   </p>
                 ) : null}
                 <Link
                   href={`/support-requests/${assignment.supportRequestId}`}
                   className="mt-5 inline-flex text-sm font-semibold text-emerald-700 hover:text-emerald-900"
                 >
-                  Open request
+                  Chi tiết yêu cầu &rarr;
                 </Link>
               </article>
             ))}
           </div>
         ) : (
           <EmptyState
-            title="You have no assignments yet"
-            description="Choose an approved request and apply to provide support."
+            title="Bạn chưa có nhiệm vụ nào"
+            description="Hãy chọn một yêu cầu đã duyệt và đăng ký tham gia hỗ trợ."
           />
         )
       ) : visibleRequests.length ? (
@@ -330,8 +329,8 @@ export default function SupportRequestsClient() {
               request={request}
               footer={
                 canAssignLocations &&
-                (request.status === "APPROVED" ||
-                  request.status === "IN_PROGRESS") ? (
+                  (request.status === "APPROVED" ||
+                    request.status === "IN_PROGRESS") ? (
                   <QuickAssignLocation
                     disabled={assigningRequestId === request.id}
                     locations={locations}
@@ -358,14 +357,14 @@ export default function SupportRequestsClient() {
         </div>
       ) : (
         <EmptyState
-          title="No matching requests found"
-          description="Try changing the status filter or search terms."
+          title="Không tìm thấy yêu cầu phù hợp"
+          description="Thử thay đổi bộ lọc trạng thái hoặc từ khóa tìm kiếm."
           actionHref={
             profile.role === "REQUESTER" && view === "primary"
               ? "/support-requests/new"
               : undefined
           }
-          actionLabel="Create request"
+          actionLabel="+ Tạo yêu cầu mới"
         />
       )}
     </div>
@@ -388,7 +387,7 @@ function QuickAssignLocation({
   if (!locations.length) {
     return (
       <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-700">
-        No active support locations are available.
+        Hiện chưa có trạm tiếp nhận nào đang hoạt động.
       </p>
     );
   }
@@ -397,7 +396,7 @@ function QuickAssignLocation({
     <div className="rounded-xl bg-slate-50 p-3">
       <label>
         <span className="mb-1.5 block text-xs font-semibold text-slate-600">
-          Assign support location
+          Chỉ định trạm tiếp nhận hỗ trợ
         </span>
         <select
           value={selectedLocationId}
@@ -405,7 +404,7 @@ function QuickAssignLocation({
           disabled={disabled}
           className="h-9 w-full rounded-lg border border-slate-300 bg-white px-2 text-xs text-slate-700 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100"
         >
-          <option value="">Select location</option>
+          <option value="">Chọn trạm tiếp nhận</option>
           {locations.map((location) => (
             <option key={location.id} value={location.id}>
               {location.name}
@@ -419,7 +418,7 @@ function QuickAssignLocation({
         onClick={onAssign}
         className="mt-2 h-9 w-full rounded-lg bg-slate-950 text-xs font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
       >
-        {disabled ? "Assigning..." : "Assign location"}
+        {disabled ? "Đang chỉ định..." : "Chỉ định trạm"}
       </button>
     </div>
   );
@@ -427,34 +426,33 @@ function QuickAssignLocation({
 
 function getPageTitle(role: string): string {
   if (role === "REQUESTER") {
-    return "Manage support requests";
+    return "Quản lý yêu cầu hỗ trợ";
   }
 
   if (role === "VOLUNTEER") {
-    return "Find support opportunities";
+    return "Tìm kiếm cơ hội hỗ trợ";
   }
 
-  return "Coordinate support requests";
+  return "Điều phối yêu cầu hỗ trợ";
 }
 
 function getPageDescription(role: string): string {
   if (role === "REQUESTER") {
-    return "Track statuses, update needs, and review volunteer applications.";
+    return "Theo dõi tiến độ, cập nhật nhu cầu và xét duyệt đơn đăng ký của tình nguyện viên.";
   }
 
   if (role === "VOLUNTEER") {
-    return "Choose requests that match your abilities and track your applications.";
+    return "Lựa chọn các yêu cầu phù hợp với khả năng và theo dõi tiến độ tham gia của bạn.";
   }
 
-  return "Review details, assign support locations, and track system-wide progress.";
+  return "Xem chi tiết yêu cầu, chỉ định trạm tiếp nhận và điều phối hoạt động trên toàn hệ thống.";
 }
 
 function tabClassName(active: boolean): string {
-  return `h-9 rounded-lg px-4 text-sm font-semibold transition ${
-    active
+  return `h-9 rounded-lg px-4 text-sm font-semibold transition ${active
       ? "bg-white text-emerald-800 shadow-sm"
       : "text-slate-500 hover:text-slate-800"
-  }`;
+    }`;
 }
 
 function SearchIcon() {
@@ -476,5 +474,5 @@ function SearchIcon() {
 function getErrorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
-    : "Unable to load support requests.";
+    : "Không thể tải danh sách yêu cầu hỗ trợ.";
 }

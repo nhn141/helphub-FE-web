@@ -39,10 +39,10 @@ export function AdminCategoriesClient() {
         setError(null);
         try {
             const token = await getAccessToken();
-            const data = await getAdminCategories(token, false); // Lấy tất cả (active = false)
+            const data = await getAdminCategories(token, false);
             setCategories(data);
         } catch (err: any) {
-            setError(err.message || "Failed to load categories.");
+            setError(err.message || "Không thể tải danh sách danh mục hỗ trợ.");
         } finally {
             setLoading(false);
         }
@@ -55,9 +55,9 @@ export function AdminCategoriesClient() {
     // --- ACTIONS ---
 
     const handleToggleStatus = async (id: string, currentStatus: boolean) => {
-        const action = currentStatus ? "deactivate" : "activate";
+        const action = currentStatus ? "ngừng hoạt động" : "kích hoạt lại";
         if (
-            !window.confirm(`Are you sure you want to ${action} this category?`)
+            !window.confirm(`Bạn có chắc muốn ${action} danh mục này?`)
         )
             return;
 
@@ -71,7 +71,7 @@ export function AdminCategoriesClient() {
                 ),
             );
         } catch (err: any) {
-            alert(`Failed to change status: ${err.message}`);
+            alert(`Lỗi khi đổi trạng thái: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
@@ -102,7 +102,7 @@ export function AdminCategoriesClient() {
             }
             setIsModalOpen(false);
         } catch (err: any) {
-            alert(`Operation failed: ${err.message}`);
+            alert(`Thao tác thất bại: ${err.message}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -121,20 +121,20 @@ export function AdminCategoriesClient() {
     return (
         <>
             <PageHeading
-                eyebrow="Taxonomy"
-                title="Categories"
-                description="Manage the classification system used for support requests."
+                eyebrow="Phân loại hệ thống"
+                title="Danh mục hỗ trợ"
+                description="Quản lý hệ thống phân loại danh mục dùng cho các yêu cầu hỗ trợ HelpHub."
                 action={
                     <button
                         onClick={openCreateModal}
-                        className="inline-flex h-11 items-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white hover:bg-emerald-800 transition"
+                        className="inline-flex h-11 items-center rounded-2xl bg-emerald-600 px-5 text-sm font-black text-white shadow-[0_4px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-1 active:shadow-none transition-all cursor-pointer"
                     >
-                        + New Category
+                        + Thêm danh mục mới
                     </button>
                 }
             />
 
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border-2 border-slate-200 shadow-sm overflow-hidden">
                 {error && (
                     <div className="p-4">
                         <Notice type="error">{error}</Notice>
@@ -143,13 +143,13 @@ export function AdminCategoriesClient() {
 
                 {loading ? (
                     <div className="py-10">
-                        <LoadingBlock />
+                        <LoadingBlock message="Đang tải danh mục..." />
                     </div>
                 ) : categories.length === 0 ? (
                     <div className="py-8 border-t border-slate-100">
                         <EmptyState
-                            title="No categories found"
-                            description="Create your first category to get started."
+                            title="Chưa có danh mục nào"
+                            description="Tạo danh mục đầu tiên để người dùng có thể phân loại yêu cầu hỗ trợ."
                         />
                     </div>
                 ) : (

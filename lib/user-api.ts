@@ -104,6 +104,32 @@ export async function updateMyProfile(
     };
 }
 
+export interface PublicUserProfileResponse {
+    id: string;
+    fullName: string;
+    avatarUrl: string | null;
+    role: "REQUESTER" | "VOLUNTEER" | "ADMIN" | "COLLABORATOR";
+    createdAt: string;
+}
+
+export async function getPublicUserProfile(
+    accessToken: string,
+    userId: string,
+): Promise<PublicUserProfileResponse> {
+    const data = await apiData<any>(
+        `/api/v1/users/${encodeURIComponent(userId)}/public`,
+        { method: "GET" },
+        accessToken,
+    );
+    return {
+        id: data.id,
+        fullName: data.fullName,
+        avatarUrl: data.avatarUrl ?? null,
+        role: (data.roleCode ?? data.role ?? "REQUESTER") as any,
+        createdAt: data.createdAt,
+    };
+}
+
 // ============================================================================
 // [BE PENDING] role-upgrade-service chưa có trong helphub-microservices.
 // Tạm thời comment API thực tế và trả về fallback rỗng.
@@ -120,7 +146,7 @@ export async function getMyRoleUpgradeRequests(
             {
                 id: "upg-1",
                 userId: "me",
-                reason: "Xin nâng cấp tài khoản lên Tình nguyện viên để tham gia cứu trợ trực tiếp tại các điểm ngập lũ.",
+                reason: "Xin nâng cấp tài khoản lên Tình nguyện viên để tham gia hỗ trợ trực tiếp tại các điểm ngập lũ.",
                 supportingDocumentsUrl: null,
                 status: "PENDING",
                 rejectionReason: null,

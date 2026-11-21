@@ -222,11 +222,11 @@ export function NotificationBell() {
         const diffHr = Math.floor(diffMin / 60);
         const diffDay = Math.floor(diffHr / 24);
 
-        if (diffSec < 60) return "Just now";
-        if (diffMin < 60) return `${diffMin}m ago`;
-        if (diffHr < 24) return `${diffHr}h ago`;
-        if (diffDay < 7) return `${diffDay}d ago`;
-        return date.toLocaleDateString();
+        if (diffSec < 60) return "Vừa xong";
+        if (diffMin < 60) return `${diffMin} phút trước`;
+        if (diffHr < 24) return `${diffHr} giờ trước`;
+        if (diffDay < 7) return `${diffDay} ngày trước`;
+        return date.toLocaleDateString("vi-VN");
     }
 
     return (
@@ -235,7 +235,7 @@ export function NotificationBell() {
             <button
                 id="notification-bell-button"
                 type="button"
-                aria-label="Notifications"
+                aria-label="Thông báo"
                 onClick={handleToggle}
                 className="relative flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
             >
@@ -258,16 +258,16 @@ export function NotificationBell() {
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                        <h3 className="text-sm font-semibold text-slate-900">
-                            Notifications
+                        <h3 className="text-sm font-bold text-slate-900">
+                            Thông báo
                         </h3>
                         {unreadCount > 0 && (
                             <button
                                 type="button"
                                 onClick={handleMarkAllAsRead}
-                                className="text-xs font-medium text-emerald-600 transition hover:text-emerald-700"
+                                className="text-xs font-bold text-emerald-600 transition hover:text-emerald-700 cursor-pointer"
                             >
-                                Mark all as read
+                                Đánh dấu đã đọc
                             </button>
                         )}
                     </div>
@@ -281,8 +281,8 @@ export function NotificationBell() {
                         ) : notifications.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-10 text-slate-400">
                                 <BellOffIcon />
-                                <p className="mt-2 text-sm">
-                                    No notifications yet
+                                <p className="mt-2 text-sm font-semibold">
+                                    Chưa có thông báo nào
                                 </p>
                             </div>
                         ) : (

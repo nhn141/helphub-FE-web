@@ -53,15 +53,15 @@ export function CategoryFormModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 className="text-lg font-bold text-slate-900">
-                        {initialData ? "Edit Category" : "Create New Category"}
+                    <h3 className="text-lg font-black text-slate-900">
+                        {initialData ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
                     </h3>
                     <button
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="text-slate-400 hover:text-slate-600"
+                        className="flex size-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
                     >
                         ✕
                     </button>
@@ -70,8 +70,8 @@ export function CategoryFormModal({
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-sm font-medium text-slate-700 mb-1">
-                                Name *
+                            <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                Tên danh mục *
                             </label>
                             <input
                                 type="text"
@@ -80,13 +80,13 @@ export function CategoryFormModal({
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 disabled={isSubmitting}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="e.g. Medical Supplies"
+                                className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900"
+                                placeholder="VD: Vật tư y tế & Thuốc men"
                             />
                         </div>
                         <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-sm font-medium text-slate-700 mb-1">
-                                Code *
+                            <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                Mã ký hiệu (Code) *
                             </label>
                             <input
                                 type="text"
@@ -95,15 +95,15 @@ export function CategoryFormModal({
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
                                 disabled={isSubmitting}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase"
-                                placeholder="e.g. MEDICAL"
+                                className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase font-mono font-bold text-slate-900"
+                                placeholder="VD: MEDICAL"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Description
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                            Mô tả danh mục *
                         </label>
                         <textarea
                             required
@@ -111,42 +111,42 @@ export function CategoryFormModal({
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             disabled={isSubmitting}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-                            placeholder="Briefly describe what belongs in this category..."
+                            className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none font-medium text-slate-900"
+                            placeholder="Mô tả các loại nhu cầu, hàng hóa thuộc danh mục này..."
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Icon URL (Optional)
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                            Đường dẫn Icon (Tùy chọn)
                         </label>
                         <input
                             type="url"
                             value={iconUrl}
                             onChange={(e) => setIconUrl(e.target.value)}
                             disabled={isSubmitting}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900"
                             placeholder="https://example.com/icon.png"
                         />
                     </div>
 
-                    <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
+                    <div className="pt-4 flex justify-end gap-2.5 border-t border-slate-100">
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition"
+                            className="h-11 rounded-2xl border-2 border-slate-200 bg-white px-5 text-sm font-black text-slate-700 shadow-[0_3px_0_0_#cbd5e1] hover:bg-slate-50 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
                         >
-                            Cancel
+                            Hủy bỏ
                         </button>
                         <button
                             type="submit"
                             disabled={
                                 isSubmitting || !name?.trim() || !code?.trim()
                             }
-                            className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition"
+                            className="h-11 rounded-2xl bg-emerald-600 px-6 text-sm font-black text-white shadow-[0_4px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 disabled:shadow-none cursor-pointer"
                         >
-                            {isSubmitting ? "Saving..." : "Save Category"}
+                            {isSubmitting ? "Đang lưu..." : "Lưu danh mục"}
                         </button>
                     </div>
                 </form>

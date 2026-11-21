@@ -201,7 +201,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
             setIsAddModalOpen(false);
         } catch (error) {
             console.error("Failed to add member", error);
-            alert("Failed to add user to group.");
+            alert("Không thể thêm người dùng vào nhóm.");
         } finally {
             setIsAddingUser(null);
         }
@@ -209,7 +209,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
 
     const handleLeaveGroup = async () => {
         const confirmLeave = window.confirm(
-            "Are you sure you want to leave this group?",
+            "Bạn có chắc chắn muốn rời khỏi nhóm này không?",
         );
         if (!confirmLeave) return;
 
@@ -220,7 +220,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
             window.location.href = "/messages";
         } catch (error) {
             console.error("Failed to leave group", error);
-            alert("Failed to leave group. Please try again.");
+            alert("Không thể rời khỏi nhóm. Vui lòng thử lại.");
         } finally {
             setIsLeaving(false);
         }
@@ -370,17 +370,16 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
 
                 <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-slate-800 truncate">
-                        {conversationDetail?.name || "Conversation Details"}
+                        {conversationDetail?.name || "Chi tiết cuộc trò chuyện"}
                     </h3>
 
-                    {/* CHỈNH SỬA: Bấm vào text để xem danh sách thành viên */}
                     {conversationDetail?.type === "GROUP" ? (
                         <button
                             onClick={() => setIsMembersModalOpen(true)}
                             className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded hover:bg-emerald-100 transition mt-0.5"
                         >
-                            {conversationDetail?.members?.length || 0} members
-                            (View)
+                            {conversationDetail?.members?.length || 0} thành viên
+                            (Xem)
                         </button>
                     ) : (
                         <p className="text-xs text-slate-400">
@@ -389,21 +388,20 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
                     )}
                 </div>
 
-                {/* CHỈNH SỬA: Thêm nút Leave Group bên cạnh Add Member */}
                 {conversationDetail?.type === "GROUP" && (
                     <div className="flex gap-2">
                         <button
                             onClick={() => setIsAddModalOpen(true)}
                             className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
                         >
-                            <span>+</span> Add
+                            <span>+</span> Thêm
                         </button>
                         <button
                             onClick={handleLeaveGroup}
                             disabled={isLeaving}
                             className="bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition disabled:opacity-50"
                         >
-                            {isLeaving ? "..." : "Leave"}
+                            {isLeaving ? "..." : "Rời nhóm"}
                         </button>
                     </div>
                 )}
@@ -412,14 +410,13 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {isLoading ? (
                     <div className="flex justify-center items-center h-full text-slate-400">
-                        Loading messages...
+                        Đang tải tin nhắn...
                     </div>
                 ) : messages.length === 0 ? (
                     <div className="flex flex-col justify-center items-center h-full text-slate-400 gap-2">
                         <span className="text-3xl">👋</span>
                         <p>
-                            Say hello! This is the beginning of your
-                            conversation.
+                            Gửi lời chào! Bắt đầu cuộc trò chuyện của bạn tại đây.
                         </p>
                     </div>
                 ) : (
@@ -529,7 +526,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
                 <form onSubmit={handleSend} className="flex items-end gap-2">
                     <label
                         className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-50 rounded-xl transition cursor-pointer"
-                        title="Attach file"
+                        title="Đính kèm tệp"
                     >
                         <svg
                             className="w-5 h-5"
@@ -562,7 +559,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
                                 handleSend(e);
                             }
                         }}
-                        placeholder="Type a message..."
+                        placeholder="Nhập tin nhắn..."
                         className="flex-1 max-h-32 min-h-[44px] p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white resize-none"
                         rows={1}
                         disabled={isSending}
@@ -603,7 +600,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden p-5 animate-in fade-in zoom-in-95 duration-150">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-bold text-slate-900">
-                                Add Recent Contacts
+                                Thêm liên hệ gần đây
                             </h3>
                             <button
                                 onClick={() => setIsAddModalOpen(false)}
@@ -616,7 +613,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
                         <div className="mt-2 bg-white border border-slate-200 rounded-xl max-h-64 overflow-y-auto">
                             {isLoadingSuggestions ? (
                                 <div className="p-4 text-xs text-center text-slate-500 animate-pulse">
-                                    Loading recent chats...
+                                    Đang tải liên hệ gần đây...
                                 </div>
                             ) : suggestedUsers.length > 0 ? (
                                 suggestedUsers.map((user) => (
@@ -653,14 +650,14 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
                                             className="ml-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-3 py-1.5 rounded-md text-xs font-semibold disabled:opacity-50 transition shrink-0"
                                         >
                                             {isAddingUser === user.id
-                                                ? "Adding..."
-                                                : "Add"}
+                                                ? "Đang thêm..."
+                                                : "Thêm"}
                                         </button>
                                     </div>
                                 ))
                             ) : (
                                 <div className="p-4 text-xs text-center text-slate-500">
-                                    No new recent contacts to add.
+                                    Không có liên hệ mới để thêm.
                                 </div>
                             )}
                         </div>
@@ -673,7 +670,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden p-5 animate-in fade-in zoom-in-95 duration-150">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-bold text-slate-900">
-                                Group Members (
+                                Thành viên nhóm (
                                 {conversationDetail?.members?.length})
                             </h3>
                             <button
@@ -706,7 +703,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
                                             {member.fullName}
                                             {member.userId === profile?.id && (
                                                 <span className="ml-1 text-xs text-emerald-600 font-normal bg-emerald-50 px-1.5 py-0.5 rounded">
-                                                    You
+                                                    Bạn
                                                 </span>
                                             )}
                                         </p>

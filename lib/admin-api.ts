@@ -3,6 +3,13 @@ import {
     SupportRequestSummary,
     SupportRequestStatus,
 } from "./api";
+import {
+    SYSTEM_CATEGORIES,
+    SYSTEM_LOCATIONS,
+    getStoredRequests,
+    updateStoredRequest,
+    getStoredPosts,
+} from "./data-store";
 
 export interface PageResponse<T> {
     content: T[];
@@ -179,72 +186,109 @@ export interface Expense {
 export async function getAdminDashboardUsers(
     accessToken: string,
 ): Promise<UserDashboardStats> {
-    // [BE PENDING]: return await apiData<UserDashboardStats>("/api/admin/dashboard/users", { method: "GET" }, accessToken);
-    return {
-        totalUsers: 24,
-        activeUsers: 22,
-        inactiveUsers: 2,
-        requesters: 16,
-        volunteers: 6,
-        collaborators: 1,
-        admins: 1,
-    };
+    try {
+        const [totalRes, activeRes, reqsRes, volsRes, collabsRes, adminsRes] =
+            await Promise.all([
+                apiData<any>(
+                    "/api/v1/admin/users?size=1",
+                    { method: "GET" },
+                    accessToken,
+                ),
+                apiData<any>(
+                    "/api/v1/admin/users?status=ACTIVE&size=1",
+                    { method: "GET" },
+                    accessToken,
+                ),
+                apiData<any>(
+                    "/api/v1/admin/users?roleCode=REQUESTER&size=1",
+                    { method: "GET" },
+                    accessToken,
+                ),
+                apiData<any>(
+                    "/api/v1/admin/users?roleCode=VOLUNTEER&size=1",
+                    { method: "GET" },
+                    accessToken,
+                ),
+                apiData<any>(
+                    "/api/v1/admin/users?roleCode=COLLABORATOR&size=1",
+                    { method: "GET" },
+                    accessToken,
+                ),
+                apiData<any>(
+                    "/api/v1/admin/users?roleCode=ADMIN&size=1",
+                    { method: "GET" },
+                    accessToken,
+                ),
+            ]);
+
+        const totalUsers = Number(totalRes?.totalElements ?? 0);
+        const activeUsers = Number(activeRes?.totalElements ?? 0);
+        const inactiveUsers = Math.max(0, totalUsers - activeUsers);
+        const requesters = Number(reqsRes?.totalElements ?? 0);
+        const volunteers = Number(volsRes?.totalElements ?? 0);
+        const collaborators = Number(collabsRes?.totalElements ?? 0);
+        const admins = Number(adminsRes?.totalElements ?? 0);
+
+        return {
+            totalUsers,
+            activeUsers,
+            inactiveUsers,
+            requesters,
+            volunteers,
+            collaborators,
+            admins,
+        };
+    } catch (err) {
+        console.error("Failed to fetch real user stats from admin API", err);
+        return {
+            totalUsers: 0,
+            activeUsers: 0,
+            inactiveUsers: 0,
+            requesters: 0,
+            volunteers: 0,
+            collaborators: 0,
+            admins: 0,
+        };
+    }
 }
 export async function getAdminDashboardSupportRequests(
     accessToken: string,
 ): Promise<SupportRequestDashboardStats> {
-    // [BE PENDING]: return await apiData<SupportRequestDashboardStats>("/api/admin/dashboard/support-requests", { method: "GET" }, accessToken);
+    const list = getStoredRequests();
     return {
-        totalSupportRequests: 15,
-        pending: 3,
-        approved: 5,
-        inProgress: 4,
-        rejected: 1,
-        completed: 2,
-        cancelled: 0,
+        totalSupportRequests: list.length,
+        pending: list.filter((r) => r.status === "PENDING").length,
+        approved: list.filter((r) => r.status === "APPROVED").length,
+        inProgress: list.filter((r) => r.status === "IN_PROGRESS").length,
+        rejected: list.filter((r) => r.status === "REJECTED").length,
+        completed: list.filter((r) => r.status === "COMPLETED").length,
+        cancelled: list.filter((r) => r.status === "CANCELLED").length,
     };
 }
 export async function getAdminDashboardCategories(
     accessToken: string,
 ): Promise<CategoryDashboardStats> {
-    // [BE PENDING]: return await apiData<CategoryDashboardStats>("/api/admin/dashboard/categories", { method: "GET" }, accessToken);
+    const list = getStoredRequests();
     return {
-        totalCategories: 4,
-        activeCategories: 4,
-        categories: [
-            {
-                categoryId: "cat-1",
-                categoryName: "Cứu trợ khẩn cấp",
-                supportRequestCount: 6,
-            },
-            {
-                categoryId: "cat-2",
-                categoryName: "Lương thực & Nhu yếu phẩm",
-                supportRequestCount: 4,
-            },
-            {
-                categoryId: "cat-3",
-                categoryName: "Y tế & Thuốc men",
-                supportRequestCount: 3,
-            },
-            {
-                categoryId: "cat-4",
-                categoryName: "Giáo dục vùng cao",
-                supportRequestCount: 2,
-            },
-        ],
+        totalCategories: SYSTEM_CATEGORIES.length,
+        activeCategories: SYSTEM_CATEGORIES.filter((c) => c.isActive).length,
+        categories: SYSTEM_CATEGORIES.map((cat) => ({
+            categoryId: cat.id,
+            categoryName: cat.name,
+            supportRequestCount: list.filter((r) => r.categoryId === cat.id).length,
+        })),
     };
 }
 export async function getAdminDashboardPosts(
     accessToken: string,
 ): Promise<PostDashboardStats> {
-    // [BE PENDING]: return await apiData<PostDashboardStats>("/api/admin/dashboard/posts", { method: "GET" }, accessToken);
+    const list = getStoredPosts();
     return {
-        totalPosts: 8,
-        active: 7,
-        underReview: 1,
-        hidden: 0,
-        removed: 0,
+        totalPosts: list.length,
+        active: list.filter((p) => p.status === "ACTIVE").length,
+        underReview: list.filter((p) => p.status === "UNDER_REVIEW").length,
+        hidden: list.filter((p) => p.status === "HIDDEN").length,
+        removed: list.filter((p) => p.status === "REMOVED").length,
     };
 }
 export async function getAdminDashboardReports(
@@ -377,72 +421,14 @@ export function patchUserStatus(
 }
 
 // ============================================================================
-// MOCK DATA: Dữ liệu mẫu cho các module quản trị chưa có backend microservices
+// DỮ LIỆU ĐỒNG BỘ: Kết nối kho dữ liệu thật (data-store) lưu trữ qua LocalStorage
+// Quản trị viên quản lý trực tiếp các yêu cầu thật do người dùng tạo
 // ============================================================================
-
-const MOCK_ADMIN_SUPPORT_REQUESTS: SupportRequestSummary[] = [
-    {
-        id: "req-1",
-        title: "Cứu trợ lương thực và nước sạch sau bão lũ tại Quảng Bình",
-        categoryName: "Cứu trợ khẩn cấp",
-        categoryId: "cat-1",
-        requesterId: "u-1",
-        requesterName: "Nguyễn Văn An",
-        requesterAvatarUrl: null,
-        status: "APPROVED",
-        address: "Xã Tân Hóa, Huyện Minh Hóa, Tỉnh Quảng Bình",
-        latitude: 17.76,
-        longitude: 105.99,
-        createdAt: "2026-10-20T09:00:00Z",
-    },
-    {
-        id: "req-2",
-        title: "Hỗ trợ áo ấm và sách vở cho học sinh điểm trường Mèo Vạc",
-        categoryName: "Giáo dục vùng cao",
-        categoryId: "cat-4",
-        requesterId: "u-2",
-        requesterName: "Trần Thị Mai",
-        requesterAvatarUrl: null,
-        status: "IN_PROGRESS",
-        address: "Xã Pả Vi, Huyện Mèo Vạc, Tỉnh Hà Giang",
-        latitude: 23.16,
-        longitude: 105.41,
-        createdAt: "2026-10-21T10:30:00Z",
-    },
-    {
-        id: "req-3",
-        title: "Thuốc men y tế sơ cấp cứu cho bà con vùng ngập sâu Lệ Thủy",
-        categoryName: "Y tế & Thuốc men",
-        categoryId: "cat-3",
-        requesterId: "u-3",
-        requesterName: "Lê Hoàng Long",
-        requesterAvatarUrl: null,
-        status: "PENDING",
-        address: "Huyện Lệ Thủy, Tỉnh Quảng Bình",
-        latitude: 17.21,
-        longitude: 106.78,
-        createdAt: "2026-10-23T14:15:00Z",
-    },
-    {
-        id: "req-4",
-        title: "Cung cấp gạo và mì gói hỗ trợ các hộ gia đình neo đơn",
-        categoryName: "Lương thực & Nhu yếu phẩm",
-        categoryId: "cat-2",
-        requesterId: "u-4",
-        requesterName: "Phạm Minh Đức",
-        requesterAvatarUrl: null,
-        status: "COMPLETED",
-        address: "Thị xã Ba Đồn, Tỉnh Quảng Bình",
-        latitude: 17.75,
-        longitude: 106.42,
-        createdAt: "2026-10-15T08:00:00Z",
-    },
-];
 
 const MOCK_ADMIN_CATEGORIES: Category[] = [
     {
         id: "cat-1",
-        name: "Cứu trợ khẩn cấp",
+        name: "hỗ trợ khẩn cấp",
         code: "EMERGENCY",
         description: "Hỗ trợ khẩn cấp thiên tai, bão lũ, sạt lở và sự cố bất ngờ",
         iconUrl: null,
@@ -511,7 +497,7 @@ const MOCK_ADMIN_LOCATIONS: SupportLocation[] = [
     },
     {
         id: "loc-3",
-        name: "Trung tâm cứu trợ TP. Hồ Chí Minh",
+        name: "Trung tâm hỗ trợ TP. Hồ Chí Minh",
         description: "Điểm quyên góp và tiếp nhận hỗ trợ khu vực phía Nam",
         latitude: 10.7769,
         longitude: 106.7009,
@@ -563,7 +549,7 @@ const MOCK_ADMIN_UPGRADES: RoleUpgradeRequest[] = [
         userId: "u-2",
         userFullName: "Trần Thị Mai",
         volunteerId: "vol-2",
-        reason: "Đã có 2 năm kinh nghiệm phụ trách các đoàn cứu trợ vùng cao, muốn nâng cấp thành Cộng tác viên (Collaborator) để quản lý điểm tập kết Hà Giang.",
+        reason: "Đã có 2 năm kinh nghiệm phụ trách các đoàn hỗ trợ vùng cao, muốn nâng cấp thành Cộng tác viên (Collaborator) để quản lý điểm tập kết Hà Giang.",
         supportingDocumentsUrl: null,
         status: "PENDING",
         rejectionReason: null,
@@ -577,7 +563,7 @@ const MOCK_ADMIN_UPGRADES: RoleUpgradeRequest[] = [
 const MOCK_ADMIN_FUNDS: CommunityFund[] = [
     {
         id: "fund-1",
-        name: "Quỹ Cứu Trợ Bão Lũ Miền Trung 2026",
+        name: "Quỹ hỗ trợ Bão Lũ Miền Trung 2026",
         description: "Quỹ chuyên biệt mua sắm thuyền cứu hộ, áo phao, nước sạch và hỗ trợ sửa chữa nhà tốc mái cho bà con vùng bão lũ.",
         totalBalance: 125000000,
         isActive: true,
@@ -589,9 +575,9 @@ const MOCK_ADMIN_EXPENSES: Expense[] = [
     {
         id: "exp-1",
         fundId: "fund-1",
-        fundName: "Quỹ Cứu Trợ Bão Lũ Miền Trung 2026",
+        fundName: "Quỹ hỗ trợ Bão Lũ Miền Trung 2026",
         supportRequestId: "req-1",
-        supportRequestTitle: "Cứu trợ lương thực Quảng Bình",
+        supportRequestTitle: "hỗ trợ lương thực Quảng Bình",
         amount: 35000000,
         description: "Mua 100 áo phao cứu sinh đạt chuẩn và 1 tấn gạo chuyển khẩn cấp vào vùng rốn lũ Tân Hóa",
         createdById: "admin",
@@ -601,7 +587,7 @@ const MOCK_ADMIN_EXPENSES: Expense[] = [
     {
         id: "exp-2",
         fundId: "fund-1",
-        fundName: "Quỹ Cứu Trợ Bão Lũ Miền Trung 2026",
+        fundName: "Quỹ hỗ trợ Bão Lũ Miền Trung 2026",
         supportRequestId: null,
         supportRequestTitle: null,
         amount: 15000000,
@@ -621,19 +607,18 @@ export async function getAdminSupportRequests(
         createdTo?: string;
     },
 ): Promise<SupportRequestSummary[]> {
-    // [BE PENDING]: return apiData<SupportRequestSummary[]>(`/api/v1/support-requests?${query.toString()}`, { method: "GET" }, accessToken);
-    if (!params.status) return MOCK_ADMIN_SUPPORT_REQUESTS;
-    return MOCK_ADMIN_SUPPORT_REQUESTS.filter((req) => req.status === params.status);
+    return getStoredRequests(params.status, params.categoryId);
 }
 
 export async function approveSupportRequest(
     accessToken: string,
     requestId: string,
 ): Promise<void> {
-    // [BE PENDING]: return apiData<void>(`/api/v1/support-requests/${encodeURIComponent(requestId)}/approve`, { method: "PATCH" }, accessToken);
-    const item = MOCK_ADMIN_SUPPORT_REQUESTS.find((r) => r.id === requestId);
-    if (item) item.status = "APPROVED";
-    return Promise.resolve();
+    updateStoredRequest(requestId, {
+        status: "APPROVED",
+        reviewedBy: "admin",
+        reviewedAt: new Date().toISOString(),
+    });
 }
 
 export async function rejectSupportRequest(
@@ -641,10 +626,12 @@ export async function rejectSupportRequest(
     requestId: string,
     payload: { rejectionReason: string },
 ): Promise<void> {
-    // [BE PENDING]: return apiData<void>(`/api/v1/support-requests/${encodeURIComponent(requestId)}/reject`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
-    const item = MOCK_ADMIN_SUPPORT_REQUESTS.find((r) => r.id === requestId);
-    if (item) item.status = "REJECTED";
-    return Promise.resolve();
+    updateStoredRequest(requestId, {
+        status: "REJECTED",
+        rejectionReason: payload.rejectionReason,
+        reviewedBy: "admin",
+        reviewedAt: new Date().toISOString(),
+    });
 }
 
 export async function assignSupportLocationToRequest(
@@ -652,8 +639,11 @@ export async function assignSupportLocationToRequest(
     requestId: string,
     payload: { supportLocationId: string },
 ): Promise<void> {
-    // [BE PENDING]: return apiData<void>(`/api/v1/support-requests/${encodeURIComponent(requestId)}/assign-support-location`, { method: "PATCH", body: JSON.stringify(payload) }, accessToken);
-    return Promise.resolve();
+    const loc = SYSTEM_LOCATIONS.find((l) => l.id === payload.supportLocationId);
+    updateStoredRequest(requestId, {
+        assignedSupportLocationId: payload.supportLocationId,
+        assignedSupportLocationName: loc ? loc.name : null,
+    });
 }
 
 export async function getAllReports(accessToken: string): Promise<Report[]> {
@@ -930,7 +920,7 @@ export async function createExpense(
         fundId: payload.fundId,
         fundName: fund ? fund.name : "Quỹ",
         supportRequestId: payload.supportRequestId,
-        supportRequestTitle: payload.supportRequestId ? "Yêu cầu cứu trợ" : null,
+        supportRequestTitle: payload.supportRequestId ? "Yêu cầu hỗ trợ" : null,
         amount: payload.amount,
         description: payload.description,
         createdById: "admin",

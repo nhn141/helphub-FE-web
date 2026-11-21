@@ -5,34 +5,35 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, type ReactNode } from "react";
 import { AuthProvider, useAuth } from "@/components/auth-provider";
 import { Notice, LoadingBlock } from "@/components/support-ui";
+import { HelpHubLogo } from "@/components/helphub-logo";
 
 const adminNavigation = [
-    { href: "/admin/dashboard", label: "Dashboard", icon: DashboardIcon },
-    { href: "/admin/users", label: "Users Management", icon: UsersIcon },
+    { href: "/admin/dashboard", label: "Tổng quan", icon: DashboardIcon },
+    { href: "/admin/users", label: "Quản lý Người dùng", icon: UsersIcon },
     {
         href: "/admin/support-requests",
-        label: "Support Requests",
+        label: "Duyệt hỗ trợ",
         icon: RequestIcon,
     },
     {
         href: "/admin/reports",
-        label: "Reports Moderation",
+        label: "Kiểm duyệt Báo cáo",
         icon: ShieldAlertIcon,
     },
-    { href: "/admin/categories", label: "Categories", icon: FolderIcon },
+    { href: "/admin/categories", label: "Danh mục Hỗ trợ", icon: FolderIcon },
     {
         href: "/admin/support-locations",
-        label: "Support Locations",
+        label: "Điểm Tiếp nhận",
         icon: MapPinIcon,
     },
     {
         href: "/admin/role-upgrades",
-        label: "Upgrade Requests",
+        label: "Nâng cấp Vai trò",
         icon: ArrowUpCircleIcon,
     },
     {
         href: "/admin/community-funds",
-        label: "Community Funds",
+        label: "Quỹ Cộng đồng",
         icon: WalletIcon,
     },
 ];
@@ -60,14 +61,14 @@ function AdminShell({ children }: { children: ReactNode }) {
     if (!profile || profile.role !== "ADMIN") {
         return (
             <div className="min-h-dvh flex items-center justify-center bg-[#f4f6f2] p-4">
-                <Notice type="error">Access Denied. Redirecting...</Notice>
+                <Notice type="error">Truy cập bị từ chối. Đang chuyển hướng...</Notice>
             </div>
         );
     }
 
     return (
         <div className="min-h-dvh bg-[#f4f6f2] text-slate-950">
-            <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-slate-200 bg-[#10261f] text-white lg:flex lg:flex-col">
+            <aside className="fixed inset-y-0 left-0 z-40 hidden w-68 border-r-2 border-emerald-950/40 bg-[#10261f] text-white lg:flex lg:flex-col shadow-xl">
                 <AdminSidebarContent
                     pathname={pathname}
                     profileName={profile.fullName}
@@ -79,10 +80,10 @@ function AdminShell({ children }: { children: ReactNode }) {
                 <div className="fixed inset-0 z-50 lg:hidden">
                     <button
                         type="button"
-                        className="absolute inset-0 bg-slate-950/45"
+                        className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"
                         onClick={() => setMobileMenuOpen(false)}
                     />
-                    <aside className="relative flex h-full w-[min(86vw,320px)] flex-col bg-[#10261f] text-white shadow-2xl">
+                    <aside className="relative flex h-full w-[min(86vw,320px)] flex-col bg-[#10261f] text-white shadow-2xl border-r-2 border-emerald-950/40">
                         <AdminSidebarContent
                             pathname={pathname}
                             profileName={profile.fullName}
@@ -93,31 +94,31 @@ function AdminShell({ children }: { children: ReactNode }) {
                 </div>
             )}
 
-            <div className="lg:pl-64">
-                <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
+            <div className="lg:pl-68">
+                <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b-2 border-slate-200/80 bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:px-8 shadow-xs">
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
                             onClick={() => setMobileMenuOpen(true)}
-                            className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 lg:hidden"
+                            className="flex size-10 items-center justify-center rounded-xl border-2 border-slate-200 bg-white text-slate-700 shadow-[0_2px_0_0_#cbd5e1] active:translate-y-0.5 active:shadow-none lg:hidden cursor-pointer"
                         >
                             <MenuIcon />
                         </button>
                         <div>
-                            <p className="text-sm font-semibold text-slate-950">
-                                HelpHub Admin Control Panel
+                            <p className="text-base font-black tracking-tight text-slate-900">
+                                HelpHub Quản trị hệ thống
                             </p>
-                            <p className="hidden text-xs text-slate-500 sm:block">
-                                System-wide monitoring & resource moderation
+                            <p className="hidden text-xs font-semibold text-emerald-700 sm:block">
+                                Giám sát toàn diện & Kiểm duyệt tài nguyên
                             </p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className="hidden sm:inline-block rounded-md bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700 border border-amber-500/20">
-                            System Admin
+                        <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-black text-amber-800 border-2 border-amber-300 shadow-[0_2px_0_0_#fde68a]">
+                            Quản trị viên
                         </span>
-                        <div className="flex size-9 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-800">
+                        <div className="flex size-10 items-center justify-center rounded-2xl border-2 border-emerald-300 bg-emerald-100 text-sm font-black text-emerald-900 shadow-[0_2px_0_0_#a7f3d0]">
                             {profile.fullName
                                 .split(" ")
                                 .slice(-1)[0]
@@ -148,21 +149,21 @@ function AdminSidebarContent({
 }) {
     return (
         <>
-            <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-amber-400 text-lg font-black text-[#10261f]">
-                    A
+            <div className="flex h-20 items-center gap-3.5 border-b-2 border-white/10 px-6">
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-white p-1.5 shadow-[0_4px_0_0_#d97706]">
+                    <HelpHubLogo className="size-full" />
                 </div>
                 <div>
-                    <p className="text-lg font-bold tracking-tight">
+                    <p className="text-xl font-black tracking-wide text-white">
                         HelpHub Admin
                     </p>
-                    <p className="text-xs text-amber-200/70">
-                        Management workspace
+                    <p className="text-[11px] font-bold text-amber-200/80 uppercase tracking-wider">
+                        Không gian quản trị
                     </p>
                 </div>
             </div>
 
-            <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+            <nav className="flex-1 space-y-1.5 px-3.5 py-5 overflow-y-auto">
                 {adminNavigation.map((item) => {
                     const active =
                         pathname === item.href ||
@@ -175,33 +176,34 @@ function AdminSidebarContent({
                             key={item.href}
                             href={item.href}
                             onClick={onNavigate}
-                            className={`flex h-10 items-center gap-3 rounded-xl px-3 text-xs font-medium transition ${
-                                active
-                                    ? "bg-amber-400 text-[#10261f] font-semibold"
-                                    : "text-white/70 hover:bg-white/5 hover:text-white"
-                            }`}
+                            className={`flex h-11 items-center gap-3 rounded-2xl px-3.5 text-xs font-black tracking-wide transition-all ${active
+                                    ? "bg-amber-400 text-[#10261f] shadow-[0_3px_0_0_#d97706] border border-amber-300"
+                                    : "text-white/75 hover:bg-white/10 hover:text-white"
+                                }`}
                         >
-                            <Icon />
+                            <span className={active ? "text-[#10261f]" : "text-amber-300"}>
+                                <Icon />
+                            </span>
                             {item.label}
                         </Link>
                     );
                 })}
             </nav>
 
-            <div className="border-t border-white/10 p-4">
-                <div className="rounded-xl bg-white/5 p-3">
-                    <p className="truncate text-xs font-semibold">
+            <div className="border-t-2 border-white/10 p-4">
+                <div className="rounded-2xl border-2 border-white/15 bg-white/5 p-3.5 shadow-sm">
+                    <p className="truncate text-xs font-black text-white">
                         {profileName}
                     </p>
-                    <p className="mt-0.5 truncate text-[10px] text-white/55">
-                        System Administrator
-                    </p>
+                    <span className="inline-block mt-0.5 rounded-full border border-amber-400/30 bg-amber-500/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-300">
+                        Quản trị hệ thống
+                    </span>
                     <button
                         type="button"
                         onClick={onLogout}
-                        className="mt-3 flex h-8 w-full items-center justify-center gap-2 rounded-lg border border-white/10 text-xs font-semibold text-white/75 hover:bg-white/5 hover:text-white"
+                        className="mt-3 flex h-8 w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 text-xs font-bold text-white/80 shadow-[0_2px_0_0_rgba(255,255,255,0.1)] hover:bg-white/10 hover:text-white active:translate-y-0.5 active:shadow-none transition cursor-pointer"
                     >
-                        Sign out
+                        Đăng xuất
                     </button>
                 </div>
             </div>

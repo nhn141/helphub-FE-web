@@ -47,7 +47,7 @@ export function LocationPicker({
     onChange,
     disabled = false,
     required = false,
-    label = "Location",
+    label = "Vị trí địa lý",
 }: LocationPickerProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletMap | null>(null);
@@ -338,7 +338,7 @@ export function LocationPicker({
                         {required ? " *" : ""}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-slate-500">
-                        Search with OpenStreetMap or click directly on the map.
+                        Tìm kiếm với OpenStreetMap hoặc nhấp trực tiếp vào vị trí trên bản đồ.
                     </p>
                 </div>
 
@@ -346,15 +346,15 @@ export function LocationPicker({
                     type="button"
                     onClick={handleUseCurrentLocation}
                     disabled={disabled}
-                    className="h-9 shrink-0 rounded-lg border border-emerald-200 bg-white px-3 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="h-9 shrink-0 rounded-xl border border-emerald-200 bg-white px-3 text-xs font-bold text-emerald-800 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    Use current location
+                    Dùng vị trí hiện tại
                 </button>
             </div>
 
             <div className="relative mt-4">
                 <label className="sr-only" htmlFor="location-search">
-                    Search location
+                    Tìm kiếm địa điểm
                 </label>
                 <div className="flex gap-2">
                     <input
@@ -370,16 +370,16 @@ export function LocationPicker({
                             }
                         }}
                         disabled={disabled}
-                        placeholder="Search by address, ward, district..."
+                        placeholder="Tìm theo địa chỉ, phường/xã, quận/huyện..."
                         className="h-11 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100"
                     />
                     <button
                         type="button"
                         onClick={() => void handleSearch()}
                         disabled={disabled || suggestionsLoading}
-                        className="h-11 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                        className="h-11 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-300"
                     >
-                        {suggestionsLoading ? "Searching..." : "Search"}
+                        {suggestionsLoading ? "Đang tìm..." : "Tìm kiếm"}
                     </button>
                 </div>
 
@@ -413,31 +413,31 @@ export function LocationPicker({
                 ) : null}
             </div>
 
-            <div className="relative mt-3 h-[240px] overflow-hidden rounded-xl border border-slate-200 bg-slate-100 sm:h-[300px]">
+            <div className="relative mt-3 h-[240px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 sm:h-[300px]">
                 <div ref={mapContainerRef} className="h-full w-full" />
                 {!mapReady ? (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-50 text-sm text-slate-500">
-                        Loading map...
+                        Đang tải bản đồ...
                     </div>
                 ) : null}
             </div>
 
-            <div className="mt-3 rounded-lg bg-white px-3 py-2 text-xs text-slate-500">
+            <div className="mt-3 rounded-xl bg-white px-3 py-2 text-xs text-slate-500 border border-slate-100">
                 {selectedPosition ? (
                     <span>
-                        Selected coordinates:{" "}
-                        <strong className="text-slate-700">
+                        Tọa độ đã chọn:{" "}
+                        <strong className="text-slate-800 font-mono">
                             {selectedPosition.lat.toFixed(6)},{" "}
                             {selectedPosition.lng.toFixed(6)}
                         </strong>
                     </span>
                 ) : (
-                    <span>No location selected yet.</span>
+                    <span>Chưa chọn vị trí nào trên bản đồ.</span>
                 )}
             </div>
 
             {pickerError ? (
-                <p className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+                <p className="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">
                     {pickerError}
                 </p>
             ) : null}
@@ -481,7 +481,7 @@ function isValidPosition(position: LatLng) {
 
 async function searchPlaces(query: string, signal: AbortSignal) {
     const params = new URLSearchParams({
-        "accept-language": "en",
+        "accept-language": "vi,en",
         addressdetails: "1",
         countrycodes: "vn",
         format: "jsonv2",
@@ -495,7 +495,7 @@ async function searchPlaces(query: string, signal: AbortSignal) {
     });
 
     if (!response.ok) {
-        throw new Error("OpenStreetMap search is temporarily unavailable.");
+        throw new Error("Dịch vụ tìm kiếm địa chỉ OpenStreetMap tạm thời không phản hồi.");
     }
 
     return (await response.json()) as NominatimResult[];
@@ -503,7 +503,7 @@ async function searchPlaces(query: string, signal: AbortSignal) {
 
 async function reverseSearch(position: LatLng) {
     const params = new URLSearchParams({
-        "accept-language": "en",
+        "accept-language": "vi,en",
         addressdetails: "1",
         format: "jsonv2",
         lat: position.lat.toString(),
@@ -516,7 +516,7 @@ async function reverseSearch(position: LatLng) {
     });
 
     if (!response.ok) {
-        throw new Error("OpenStreetMap reverse lookup is unavailable.");
+        throw new Error("Không thể tra cứu tên địa chỉ từ tọa độ bản đồ.");
     }
 
     const result = (await response.json()) as Partial<NominatimResult> & {
@@ -551,5 +551,5 @@ function getSearchErrorMessage(error: unknown) {
         return error.message;
     }
 
-    return "Unable to search locations. Try again in a moment.";
+    return "Không thể tìm kiếm địa điểm. Vui lòng thử lại sau giây lát.";
 }

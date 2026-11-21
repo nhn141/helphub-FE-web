@@ -24,16 +24,16 @@ export function SupportRequestTable({
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
+                <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-bold border-b border-slate-200">
                     <tr>
                         <th className="px-5 py-3 min-w-[250px]">
-                            Request Info
+                            Thông tin yêu cầu
                         </th>
-                        <th className="px-5 py-3">Category</th>
-                        <th className="px-5 py-3">Status</th>
-                        <th className="px-5 py-3">Date</th>
+                        <th className="px-5 py-3">Danh mục</th>
+                        <th className="px-5 py-3">Trạng thái</th>
+                        <th className="px-5 py-3">Thời gian</th>
                         <th className="px-5 py-3 min-w-[180px]">
-                            Actions / Location
+                            Hành động / Trạm tiếp nhận
                         </th>
                     </tr>
                 </thead>
@@ -48,18 +48,18 @@ export function SupportRequestTable({
                             >
                                 <td className="px-5 py-3">
                                     <p
-                                        className="font-semibold text-slate-900 truncate max-w-[250px]"
+                                        className="font-bold text-slate-900 truncate max-w-[250px]"
                                         title={req.title}
                                     >
                                         {req.title}
                                     </p>
                                     <p className="text-xs text-slate-500 mt-0.5">
-                                        By: {req.requesterName}
+                                        Người gửi: {req.requesterName}
                                     </p>
                                 </td>
 
                                 <td className="px-5 py-3">
-                                    <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-semibold">
+                                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold">
                                         {req.categoryName}
                                     </span>
                                 </td>
@@ -85,10 +85,14 @@ export function SupportRequestTable({
                                     </span>
                                 </td>
 
-                                <td className="px-5 py-3 text-xs">
+                                <td className="px-5 py-3 text-xs text-slate-500 font-medium">
                                     {new Date(
                                         req.createdAt,
-                                    ).toLocaleDateString()}
+                                    ).toLocaleDateString("vi-VN", {
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                    })}
                                 </td>
 
                                 <td className="px-5 py-3">
@@ -99,16 +103,16 @@ export function SupportRequestTable({
                                                     onApprove(req.id)
                                                 }
                                                 disabled={isProcessing}
-                                                className="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700 disabled:opacity-50"
+                                                className="px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition cursor-pointer"
                                             >
-                                                Approve
+                                                Phê duyệt
                                             </button>
                                             <button
                                                 onClick={() => onReject(req.id)}
                                                 disabled={isProcessing}
-                                                className="px-3 py-1 bg-rose-50 text-rose-600 text-xs font-semibold rounded hover:bg-rose-100 disabled:opacity-50"
+                                                className="px-3 py-1 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg border border-rose-200 hover:bg-rose-100 disabled:opacity-50 transition cursor-pointer"
                                             >
-                                                Reject
+                                                Từ chối
                                             </button>
                                         </div>
                                     )}
@@ -123,11 +127,11 @@ export function SupportRequestTable({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="w-full px-2 py-1.5 text-xs border border-emerald-300 rounded bg-emerald-50 text-emerald-800 outline-none focus:ring-1 focus:ring-emerald-500"
+                                            className="w-full px-2 py-1.5 text-xs border border-emerald-300 rounded-lg bg-emerald-50 text-emerald-800 font-bold outline-none focus:ring-1 focus:ring-emerald-500"
                                             defaultValue=""
                                         >
                                             <option value="" disabled>
-                                                -- Assign Location --
+                                                -- Chỉ định trạm tiếp nhận --
                                             </option>
                                             {locations.map((loc) => (
                                                 <option
@@ -144,7 +148,7 @@ export function SupportRequestTable({
                                         req.status !== "APPROVED" &&
                                         req.status !== "IN_PROGRESS" && (
                                             <span className="text-xs italic text-slate-400">
-                                                Action completed
+                                                Đã xử lý xong
                                             </span>
                                         )}
                                 </td>

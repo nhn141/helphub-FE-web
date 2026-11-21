@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const session = await getValidSession();
 
     if (!session) {
-      router.replace("/");
+      router.replace("/login");
       throw new Error("Your session has expired.");
     }
 
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     clearSession();
-    router.replace("/");
+    router.replace("/login");
   }, [router]);
 
   const value = useMemo(

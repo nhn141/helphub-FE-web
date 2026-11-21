@@ -47,7 +47,7 @@ export function AdminRoleUpgradesClient() {
             setTotalPages(response.totalPages);
             setTotalElements(response.totalElements);
         } catch (err: any) {
-            setError(err.message || "Failed to load upgrade requests.");
+            setError(err.message || "Không thể tải danh sách yêu cầu nâng cấp vai trò.");
         } finally {
             setLoading(false);
         }
@@ -67,7 +67,7 @@ export function AdminRoleUpgradesClient() {
     const handleApprove = async (id: string) => {
         if (
             !window.confirm(
-                "Approve this request? The user will immediately be promoted to COLLABORATOR.",
+                "Phê duyệt yêu cầu này? Người dùng sẽ ngay lập tức được nâng cấp vai trò thành Điều phối viên (COLLABORATOR).",
             )
         )
             return;
@@ -78,17 +78,17 @@ export function AdminRoleUpgradesClient() {
             await approveRoleUpgradeRequest(token, id);
             fetchRequests();
         } catch (err: any) {
-            alert(`Failed to approve: ${err.message}`);
+            alert(`Lỗi khi phê duyệt: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
     };
 
     const handleReject = async (id: string) => {
-        const reason = window.prompt("Please enter the reason for rejection:");
+        const reason = window.prompt("Vui lòng nhập lý do từ chối đơn nâng cấp:");
         if (reason === null) return;
         if (!reason.trim()) {
-            alert("Rejection reason cannot be empty.");
+            alert("Lý do từ chối không được để trống.");
             return;
         }
 
@@ -100,21 +100,28 @@ export function AdminRoleUpgradesClient() {
             });
             fetchRequests();
         } catch (err: any) {
-            alert(`Failed to reject: ${err.message}`);
+            alert(`Lỗi khi từ chối: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
     };
 
+    const statusLabels: Record<string, string> = {
+        PENDING: "Chờ phê duyệt",
+        APPROVED: "Đã phê duyệt",
+        REJECTED: "Đã từ chối",
+        CANCELLED: "Đã hủy",
+    };
+
     return (
         <>
             <PageHeading
-                eyebrow="Access Control"
-                title="Role Upgrade Requests"
-                description="Review and process applications from Volunteers wanting to become Collaborators."
+                eyebrow="Phân quyền hệ thống"
+                title="Yêu cầu nâng cấp vai trò"
+                description="Xét duyệt các đơn đăng ký nâng cấp vai trò từ Tình nguyện viên lên Điều phối viên."
             />
 
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border-2 border-slate-200 shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-slate-200 bg-slate-50 flex gap-3 flex-wrap">
                     <select
                         value={statusFilter}
@@ -125,20 +132,20 @@ export function AdminRoleUpgradesClient() {
                                     | "ALL",
                             )
                         }
-                        className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 min-w-[150px]"
+                        className="px-3.5 py-2 text-sm border-2 border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 min-w-[170px]"
                     >
-                        <option value="ALL">All Requests</option>
-                        <option value="PENDING">Pending (Action Req)</option>
-                        <option value="APPROVED">Approved</option>
-                        <option value="REJECTED">Rejected</option>
-                        <option value="CANCELLED">Cancelled</option>
+                        <option value="ALL">Tất cả yêu cầu</option>
+                        <option value="PENDING">Chờ duyệt (Cần xử lý)</option>
+                        <option value="APPROVED">Đã phê duyệt</option>
+                        <option value="REJECTED">Đã từ chối</option>
+                        <option value="CANCELLED">Đã hủy</option>
                     </select>
 
                     <button
                         onClick={fetchRequests}
-                        className="px-3 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                        className="px-4 py-2 text-sm font-black text-slate-700 bg-white border-2 border-slate-200 rounded-xl shadow-[0_2px_0_0_#cbd5e1] hover:bg-slate-50 active:translate-y-0.5 active:shadow-none transition cursor-pointer"
                     >
-                        Refresh
+                        Làm mới
                     </button>
                 </div>
 
@@ -150,29 +157,29 @@ export function AdminRoleUpgradesClient() {
 
                 {loading ? (
                     <div className="py-10">
-                        <LoadingBlock />
+                        <LoadingBlock message="Đang tải danh sách yêu cầu..." />
                     </div>
                 ) : requests.length === 0 ? (
                     <div className="py-8 border-t border-slate-100">
                         <EmptyState
-                            title="No upgrade requests found"
-                            description="You're all caught up."
+                            title="Không có yêu cầu nâng cấp nào"
+                            description="Tất cả các đơn đã được xử lý xong."
                         />
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm text-slate-600">
-                            <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
+                            <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-bold border-b border-slate-200">
                                 <tr>
-                                    <th className="px-5 py-3 min-w-[150px]">
-                                        Applicant
+                                    <th className="px-5 py-3 min-w-[170px]">
+                                        Người đăng ký
                                     </th>
                                     <th className="px-5 py-3 min-w-[250px]">
-                                        Reason & Evidence
+                                        Lý do & Hồ sơ năng lực
                                     </th>
-                                    <th className="px-5 py-3">Status</th>
+                                    <th className="px-5 py-3">Trạng thái</th>
                                     <th className="px-5 py-3 text-right">
-                                        Actions
+                                        Hành động
                                     </th>
                                 </tr>
                             </thead>
@@ -188,14 +195,14 @@ export function AdminRoleUpgradesClient() {
                                             className="hover:bg-slate-50 transition"
                                         >
                                             <td className="px-5 py-3 align-top">
-                                                <p className="font-semibold text-slate-900">
+                                                <p className="font-bold text-slate-900">
                                                     {req.userFullName}
                                                 </p>
                                                 <p
                                                     className="text-[10px] text-slate-500 font-mono mt-1"
                                                     title={req.userId}
                                                 >
-                                                    UID:{" "}
+                                                    Mã:{" "}
                                                     {req.userId
                                                         ? req.userId.substring(
                                                               0,
@@ -204,10 +211,10 @@ export function AdminRoleUpgradesClient() {
                                                         : "N/A"}
                                                     ...
                                                 </p>
-                                                <p className="text-xs text-slate-400 mt-1">
+                                                <p className="text-xs text-slate-400 mt-1 font-medium">
                                                     {new Date(
                                                         req.createdAt,
-                                                    ).toLocaleDateString()}
+                                                    ).toLocaleDateString("vi-VN")}
                                                 </p>
                                             </td>
 
@@ -222,17 +229,15 @@ export function AdminRoleUpgradesClient() {
                                                         }
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="inline-block mt-2 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100"
+                                                        className="inline-block mt-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition"
                                                     >
-                                                        📎 View Supporting
-                                                        Document
+                                                        📎 Xem tài liệu chứng minh &rarr;
                                                     </a>
                                                 )}
                                                 {req.rejectionReason && (
-                                                    <div className="mt-2 p-2 bg-rose-50 border border-rose-100 rounded text-xs text-rose-700">
+                                                    <div className="mt-2 p-2 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 font-medium">
                                                         <span className="font-bold">
-                                                            Rejected
-                                                            because:{" "}
+                                                            Lý do từ chối:{" "}
                                                         </span>
                                                         {req.rejectionReason}
                                                     </div>
@@ -249,13 +254,13 @@ export function AdminRoleUpgradesClient() {
                                     ? "bg-emerald-100 text-emerald-800"
                                     : "bg-rose-100 text-rose-800"
                           }`}
-                                                >
-                                                    {req.status}
+                                >
+                                                    {statusLabels[req.status] || req.status}
                                                 </span>
                                                 {req.processedByName &&
                                                     !isPending && (
                                                         <p className="text-[10px] text-slate-400 mt-1">
-                                                            by{" "}
+                                                            Bởi:{" "}
                                                             {
                                                                 req.processedByName
                                                             }
@@ -275,9 +280,9 @@ export function AdminRoleUpgradesClient() {
                                                             disabled={
                                                                 isProcessing
                                                             }
-                                                            className="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700 disabled:opacity-50"
+                                                            className="px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition cursor-pointer"
                                                         >
-                                                            Approve
+                                                            Phê duyệt
                                                         </button>
                                                         <button
                                                             onClick={() =>
@@ -288,14 +293,14 @@ export function AdminRoleUpgradesClient() {
                                                             disabled={
                                                                 isProcessing
                                                             }
-                                                            className="px-3 py-1 bg-rose-50 text-rose-600 text-xs font-semibold rounded hover:bg-rose-100 disabled:opacity-50"
+                                                            className="px-3 py-1 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg border border-rose-200 hover:bg-rose-100 disabled:opacity-50 transition cursor-pointer"
                                                         >
-                                                            Reject
+                                                            Từ chối
                                                         </button>
                                                     </div>
                                                 ) : (
                                                     <span className="text-xs text-slate-400 italic">
-                                                        Processed
+                                                        Đã xử lý
                                                     </span>
                                                 )}
                                             </td>
@@ -309,13 +314,13 @@ export function AdminRoleUpgradesClient() {
 
                 {!loading && totalPages > 1 && (
                     <div className="p-4 border-t border-slate-200 flex items-center justify-between bg-slate-50">
-                        <p className="text-xs text-slate-500">
-                            Page{" "}
-                            <span className="font-semibold text-slate-700">
+                        <p className="text-xs text-slate-500 font-medium">
+                            Trang{" "}
+                            <span className="font-bold text-slate-800">
                                 {page + 1}
                             </span>{" "}
-                            of{" "}
-                            <span className="font-semibold text-slate-700">
+                            trên{" "}
+                            <span className="font-bold text-slate-800">
                                 {totalPages}
                             </span>
                         </p>
@@ -325,9 +330,9 @@ export function AdminRoleUpgradesClient() {
                                     setPage((p) => Math.max(0, p - 1))
                                 }
                                 disabled={page === 0}
-                                className="px-3 py-1 text-xs font-medium border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50"
+                                className="px-3 py-1 text-xs font-bold border border-slate-300 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-50 transition cursor-pointer"
                             >
-                                Previous
+                                Trước
                             </button>
                             <button
                                 onClick={() =>
@@ -336,9 +341,9 @@ export function AdminRoleUpgradesClient() {
                                     )
                                 }
                                 disabled={page >= totalPages - 1}
-                                className="px-3 py-1 text-xs font-medium border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50"
+                                className="px-3 py-1 text-xs font-bold border border-slate-300 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-50 transition cursor-pointer"
                             >
-                                Next
+                                Tiếp
                             </button>
                         </div>
                     </div>

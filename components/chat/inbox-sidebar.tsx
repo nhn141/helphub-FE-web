@@ -79,7 +79,7 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
             setGroupName("");
         } catch (err: any) {
             setModalError(
-                err.message || "Failed to start conversation. Check user info.",
+                err.message || "Không thể tạo cuộc trò chuyện. Vui lòng kiểm tra lại thông tin.",
             );
         } finally {
             setIsCreating(false);
@@ -89,19 +89,19 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
     return (
         <div className="flex flex-col h-full bg-white relative">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                <h2 className="text-xl font-bold text-slate-800">Messages</h2>
+                <h2 className="text-xl font-bold text-slate-800">Tin nhắn</h2>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="p-2 text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition"
-                        title="New Chat"
+                        title="Cuộc trò chuyện mới"
                     >
                         <PlusIcon />
                     </button>
                     <button
                         onClick={fetchInbox}
                         className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition"
-                        title="Refresh inbox"
+                        title="Làm mới danh sách"
                     >
                         🔄
                     </button>
@@ -111,17 +111,17 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
             <div className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-slate-200">
                 {loading ? (
                     <div className="p-4 text-center text-slate-400 text-sm animate-pulse">
-                        Loading messages...
+                        Đang tải tin nhắn...
                     </div>
                 ) : conversations.length === 0 ? (
                     <div className="p-8 text-center text-slate-400 text-sm flex flex-col items-center gap-2">
                         <span className="text-3xl">📭</span>
-                        <p>No conversations yet.</p>
+                        <p>Chưa có cuộc trò chuyện nào.</p>
                         <button
                             onClick={() => setIsModalOpen(true)}
                             className="mt-2 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition"
                         >
-                            Start a conversation
+                            Bắt đầu trò chuyện
                         </button>
                     </div>
                 ) : (
@@ -142,17 +142,16 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                             }
                         }
 
-                        const finalName = displayName || "Unknown User";
+                        const finalName = displayName || "Người dùng";
 
                         return (
                             <button
                                 key={conv.id}
                                 onClick={() => onSelect(conv.id)}
-                                className={`w-full text-left p-3 rounded-xl flex items-center gap-3 transition ${
-                                    isActive
+                                className={`w-full text-left p-3 rounded-xl flex items-center gap-3 transition ${isActive
                                         ? "bg-emerald-50 border border-emerald-100"
                                         : "hover:bg-slate-50 border border-transparent"
-                                }`}
+                                    }`}
                             >
                                 <div className="relative size-12 rounded-full flex-shrink-0 bg-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-500">
                                     {displayAvatar ? (
@@ -178,14 +177,14 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                                         >
                                             {conv.updatedAt
                                                 ? new Date(
-                                                      conv.updatedAt,
-                                                  ).toLocaleDateString(
-                                                      undefined,
-                                                      {
-                                                          month: "short",
-                                                          day: "numeric",
-                                                      },
-                                                  )
+                                                    conv.updatedAt,
+                                                ).toLocaleDateString(
+                                                    undefined,
+                                                    {
+                                                        month: "short",
+                                                        day: "numeric",
+                                                    },
+                                                )
                                                 : ""}
                                         </span>
                                     </div>
@@ -194,10 +193,10 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                                             className={`text-xs truncate ${isUnread ? "font-semibold text-slate-800" : "text-slate-500"}`}
                                         >
                                             {isUnread ? (
-                                                "New message received"
+                                                "Có tin nhắn mới"
                                             ) : (
                                                 <span className="italic text-slate-400">
-                                                    Tap to view chat
+                                                    Nhấn để xem tin nhắn
                                                 </span>
                                             )}
                                         </p>
@@ -220,7 +219,7 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden p-5 animate-in fade-in zoom-in-95 duration-150">
                         <h3 className="text-lg font-bold text-slate-900 mb-4">
-                            New Conversation
+                            Tạo cuộc trò chuyện mới
                         </h3>
 
                         <div className="flex bg-slate-100 p-1 rounded-lg mb-4">
@@ -232,7 +231,7 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                                 }}
                                 className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition ${chatMode === "PRIVATE" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                             >
-                                Direct Message
+                                Nhắn tin riêng
                             </button>
                             <button
                                 type="button"
@@ -242,7 +241,7 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                                 }}
                                 className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition ${chatMode === "GROUP" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                             >
-                                Group Chat
+                                Trò chuyện nhóm
                             </button>
                         </div>
 
@@ -256,7 +255,7 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                             {chatMode === "PRIVATE" ? (
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 mb-1">
-                                        User Email
+                                        Email người dùng
                                     </label>
                                     <input
                                         type="email"
@@ -273,13 +272,13 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                             ) : (
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 mb-1">
-                                        Group Name
+                                        Tên nhóm
                                     </label>
                                     <input
                                         type="text"
                                         required
                                         disabled={isCreating}
-                                        placeholder="e.g., Volunteer Team Alpha"
+                                        placeholder="Ví dụ: Đội hỗ trợ miền Trung"
                                         value={groupName}
                                         onChange={(e) =>
                                             setGroupName(e.target.value)
@@ -301,14 +300,14 @@ export function InboxSidebar({ activeId, onSelect }: InboxSidebarProps) {
                                     }}
                                     className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 rounded-md hover:bg-slate-200 transition"
                                 >
-                                    Cancel
+                                    Hủy
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isCreating}
                                     className="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50 transition"
                                 >
-                                    {isCreating ? "Creating..." : "Create"}
+                                    {isCreating ? "Đang tạo..." : "Tạo"}
                                 </button>
                             </div>
                         </form>

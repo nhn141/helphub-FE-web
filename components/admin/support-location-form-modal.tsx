@@ -75,7 +75,7 @@ export function SupportLocationFormModal({
             !Number.isFinite(parsedLongitude)
         ) {
             setLocationError(
-                "Search for this support location or select a point on the map.",
+                "Vui lòng tìm kiếm vị trí hoặc chọn một điểm trên bản đồ.",
             );
             return;
         }
@@ -94,19 +94,19 @@ export function SupportLocationFormModal({
 
     return (
         <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-slate-950/50 p-3 backdrop-blur-sm sm:p-6">
-            <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200 sm:max-h-[calc(100dvh-3rem)]">
-                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white px-4 py-3 sm:px-6 sm:py-4">
-                    <h3 className="text-lg font-bold text-slate-900">
+            <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200 sm:max-h-[calc(100dvh-3rem)]">
+                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white px-5 py-4 sm:px-6">
+                    <h3 className="text-lg font-black text-slate-900">
                         {initialData
-                            ? "Edit Support Location"
-                            : "Create New Location"}
+                            ? "Chỉnh sửa trạm tiếp nhận"
+                            : "Thêm trạm tiếp nhận mới"}
                     </h3>
                     <button
                         type="button"
-                        aria-label="Close modal"
+                        aria-label="Đóng"
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="text-[0px] text-slate-400 hover:text-slate-600 after:text-sm after:content-['X']"
+                        className="flex size-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
                     >
                         ✕
                     </button>
@@ -114,16 +114,16 @@ export function SupportLocationFormModal({
 
                 <form
                     onSubmit={handleSubmit}
-                    className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:p-6"
+                    className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:p-6"
                 >
                     <div className="space-y-4">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            General Info
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider">
+                            Thông tin chung
                         </h4>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Location Name *
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                    Tên trạm tiếp nhận *
                                 </label>
                                 <input
                                     type="text"
@@ -132,13 +132,13 @@ export function SupportLocationFormModal({
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     disabled={isSubmitting}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="e.g. Central Relief Hub"
+                                    className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900"
+                                    placeholder="VD: Trạm hỗ trợ Trung tâm Quận 1"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Contact Phone *
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                    Số điện thoại hotline *
                                 </label>
                                 <input
                                     type="tel"
@@ -150,13 +150,13 @@ export function SupportLocationFormModal({
                                         setContactPhone(e.target.value)
                                     }
                                     disabled={isSubmitting}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="e.g. 0901234567"
+                                    className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900"
+                                    placeholder="VD: 0901234567"
                                 />
                             </div>
                             <div className="sm:col-span-2">
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Description *
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                    Mô tả hoạt động *
                                 </label>
                                 <textarea
                                     required
@@ -166,21 +166,21 @@ export function SupportLocationFormModal({
                                         setDescription(e.target.value)
                                     }
                                     disabled={isSubmitting}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-                                    placeholder="Details about capacity, operating hours, etc."
+                                    className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none font-medium text-slate-900"
+                                    placeholder="Thông tin về sức chứa, giờ mở cửa, loại vật tư tiếp nhận..."
                                 />
                             </div>
                         </div>
                     </div>
 
                     <div className="space-y-4 pt-2">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-t pt-4">
-                            Address & Location
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider border-t border-slate-100 pt-4">
+                            Địa chỉ & Tọa độ bản đồ
                         </h4>
                         <LocationPicker
                             required
                             disabled={isSubmitting}
-                            label="Support location"
+                            label="Địa điểm đặt trạm"
                             value={{ address, latitude, longitude }}
                             onChange={(location) => {
                                 setLocationError(null);
@@ -190,20 +190,20 @@ export function SupportLocationFormModal({
                             }}
                         />
                         {locationError ? (
-                            <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+                            <p className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 border border-rose-200">
                                 {locationError}
                             </p>
                         ) : null}
                     </div>
 
                     <div className="space-y-4 pt-2">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-t pt-4">
-                            Banking Details (Optional)
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider border-t border-slate-100 pt-4">
+                            Thông tin tài khoản ngân hàng (Không bắt buộc)
                         </h4>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Bank Name
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                    Tên ngân hàng
                                 </label>
                                 <input
                                     type="text"
@@ -212,13 +212,13 @@ export function SupportLocationFormModal({
                                         setBankName(e.target.value)
                                     }
                                     disabled={isSubmitting}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="e.g. VCB"
+                                    className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900"
+                                    placeholder="VD: Vietcombank, MB Bank..."
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Account Number
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                                    Số tài khoản nhận hỗ trợ
                                 </label>
                                 <input
                                     type="text"
@@ -227,21 +227,21 @@ export function SupportLocationFormModal({
                                         setBankAccountNumber(e.target.value)
                                     }
                                     disabled={isSubmitting}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="e.g. 123456789"
+                                    className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900"
+                                    placeholder="VD: 1029384756"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="sticky bottom-0 -mx-4 -mb-5 mt-6 flex flex-col-reverse gap-2 border-t border-slate-100 bg-white px-4 py-4 sm:-mx-6 sm:-mb-6 sm:flex-row sm:justify-end sm:px-6">
+                    <div className="sticky bottom-0 -mx-5 -mb-5 mt-6 flex flex-col-reverse gap-2 border-t border-slate-100 bg-white px-5 py-4 sm:-mx-6 sm:-mb-6 sm:flex-row sm:justify-end sm:px-6">
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="h-10 rounded-lg bg-slate-100 px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-200"
+                            className="h-11 rounded-2xl border-2 border-slate-200 bg-white px-5 text-sm font-black text-slate-700 shadow-[0_3px_0_0_#cbd5e1] hover:bg-slate-50 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
                         >
-                            Cancel
+                            Hủy bỏ
                         </button>
                         <button
                             type="submit"
@@ -253,9 +253,9 @@ export function SupportLocationFormModal({
                                 !latitude.trim() ||
                                 !longitude.trim()
                             }
-                            className="h-10 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                            className="h-11 rounded-2xl bg-emerald-600 px-6 text-sm font-black text-white shadow-[0_4px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 disabled:shadow-none cursor-pointer"
                         >
-                            {isSubmitting ? "Saving..." : "Save Location"}
+                            {isSubmitting ? "Đang lưu..." : "Lưu trạm tiếp nhận"}
                         </button>
                     </div>
                 </form>

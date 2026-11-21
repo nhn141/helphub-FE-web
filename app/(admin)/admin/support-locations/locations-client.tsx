@@ -38,10 +38,10 @@ export function AdminLocationsClient() {
         setError(null);
         try {
             const token = await getAccessToken();
-            const data = await getAdminSupportLocations(token, false); // Lấy tất cả
+            const data = await getAdminSupportLocations(token, false);
             setLocations(data);
         } catch (err: any) {
-            setError(err.message || "Failed to load support locations.");
+            setError(err.message || "Không thể tải danh sách trạm tiếp nhận.");
         } finally {
             setLoading(false);
         }
@@ -54,10 +54,10 @@ export function AdminLocationsClient() {
     // --- ACTIONS ---
 
     const handleToggleStatus = async (id: string, currentStatus: boolean) => {
-        const action = currentStatus ? "deactivate" : "activate";
+        const action = currentStatus ? "ngừng hoạt động" : "kích hoạt lại";
         if (
             !window.confirm(
-                `Are you sure you want to ${action} this support location?`,
+                `Bạn có chắc chắn muốn ${action} trạm tiếp nhận hỗ trợ này?`,
             )
         )
             return;
@@ -74,7 +74,7 @@ export function AdminLocationsClient() {
                 ),
             );
         } catch (err: any) {
-            alert(`Failed to change status: ${err.message}`);
+            alert(`Lỗi khi đổi trạng thái: ${err.message}`);
         } finally {
             setProcessingId(null);
         }
@@ -105,7 +105,7 @@ export function AdminLocationsClient() {
             }
             setIsModalOpen(false);
         } catch (err: any) {
-            alert(`Operation failed: ${err.message}`);
+            alert(`Thao tác thất bại: ${err.message}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -124,20 +124,20 @@ export function AdminLocationsClient() {
     return (
         <>
             <PageHeading
-                eyebrow="Infrastructure"
-                title="Support Locations"
-                description="Manage physical hubs, warehouses, and drop-off points for relief goods."
+                eyebrow="Cơ sở hạ tầng"
+                title="Trạm tiếp nhận hỗ trợ"
+                description="Quản lý các trạm tiếp nhận, kho bãi và điểm tập kết hàng hóa nhu yếu phẩm."
                 action={
                     <button
                         onClick={openCreateModal}
-                        className="inline-flex h-11 items-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white hover:bg-emerald-800 transition"
+                        className="inline-flex h-11 items-center rounded-2xl bg-emerald-600 px-5 text-sm font-black text-white shadow-[0_4px_0_0_#065f46] hover:bg-emerald-500 active:translate-y-1 active:shadow-none transition-all cursor-pointer"
                     >
-                        + New Location
+                        + Thêm trạm mới
                     </button>
                 }
             />
 
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border-2 border-slate-200 shadow-sm overflow-hidden">
                 {error && (
                     <div className="p-4">
                         <Notice type="error">{error}</Notice>
@@ -146,13 +146,13 @@ export function AdminLocationsClient() {
 
                 {loading ? (
                     <div className="py-10">
-                        <LoadingBlock />
+                        <LoadingBlock message="Đang tải danh sách trạm..." />
                     </div>
                 ) : locations.length === 0 ? (
                     <div className="py-8 border-t border-slate-100">
                         <EmptyState
-                            title="No locations found"
-                            description="Create your first support location to get started."
+                            title="Chưa có trạm tiếp nhận nào"
+                            description="Tạo trạm tiếp nhận đầu tiên để điều phối nguồn lực hỗ trợ."
                         />
                     </div>
                 ) : (
