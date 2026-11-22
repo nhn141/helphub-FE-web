@@ -11,10 +11,11 @@ import {
   type ReactNode,
 } from "react";
 
-import { getMyProfile, type UserProfile } from "@/lib/api";
+import { getMyProfile, logout as logoutApi, type UserProfile } from "@/lib/api";
 import {
   clearSession,
   getValidSession,
+  readSession,
   type StoredSession,
 } from "@/lib/session";
 
@@ -22,7 +23,7 @@ type AuthContextValue = {
   profile: UserProfile;
   getAccessToken: () => Promise<string>;
   reloadProfile: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -86,9 +87,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [requireSession]);
 
-  const logout = useCallback(() => {
-    clearSession();
-    router.replace("/login");
+  const logout = useCallback(async () => {
+    try {
+      const session = readSession();
+      if (session?.accessToken) {
+        await logoutApi(session.accessToken);
+      }
+    } catch (err) {
+      console.warn("Lỗi thu hồi phiên đăng nhập từ server:", err);
+    } finally {
+      clearSession();
+      setProfile(null);
+      router.replace("/login");
+    }
   }, [router]);
 
   const value = useMemo(

@@ -208,9 +208,6 @@ export default function DashboardClient() {
           <h2 className="text-base font-bold tracking-tight text-slate-800">
             Tác động từ cộng đồng
           </h2>
-          <span className="text-xs text-slate-400">
-            Cập nhật theo thời gian thực
-          </span>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -319,27 +316,27 @@ export default function DashboardClient() {
 
               <div
                 className={`rounded-xl border p-3 ${myRecentRequest.status === "APPROVED" ||
-                    myRecentRequest.status === "IN_PROGRESS" ||
-                    myRecentRequest.status === "COMPLETED"
-                    ? "border-emerald-200 bg-emerald-50/60"
-                    : "border-slate-200 bg-slate-50"
+                  myRecentRequest.status === "IN_PROGRESS" ||
+                  myRecentRequest.status === "COMPLETED"
+                  ? "border-emerald-200 bg-emerald-50/60"
+                  : "border-slate-200 bg-slate-50"
                   }`}
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2
                     className={`size-4 ${myRecentRequest.status === "APPROVED" ||
-                        myRecentRequest.status === "IN_PROGRESS" ||
-                        myRecentRequest.status === "COMPLETED"
-                        ? "text-emerald-600"
-                        : "text-slate-300"
+                      myRecentRequest.status === "IN_PROGRESS" ||
+                      myRecentRequest.status === "COMPLETED"
+                      ? "text-emerald-600"
+                      : "text-slate-300"
                       }`}
                   />
                   <span
                     className={`text-xs font-bold ${myRecentRequest.status === "APPROVED" ||
-                        myRecentRequest.status === "IN_PROGRESS" ||
-                        myRecentRequest.status === "COMPLETED"
-                        ? "text-emerald-900"
-                        : "text-slate-500"
+                      myRecentRequest.status === "IN_PROGRESS" ||
+                      myRecentRequest.status === "COMPLETED"
+                      ? "text-emerald-900"
+                      : "text-slate-500"
                       }`}
                   >
                     2. Gom nhu yếu phẩm
@@ -352,21 +349,21 @@ export default function DashboardClient() {
 
               <div
                 className={`rounded-xl border p-3 ${myRecentRequest.status === "COMPLETED"
-                    ? "border-emerald-200 bg-emerald-50/60"
-                    : "border-slate-200 bg-slate-50"
+                  ? "border-emerald-200 bg-emerald-50/60"
+                  : "border-slate-200 bg-slate-50"
                   }`}
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2
                     className={`size-4 ${myRecentRequest.status === "COMPLETED"
-                        ? "text-emerald-600"
-                        : "text-slate-300"
+                      ? "text-emerald-600"
+                      : "text-slate-300"
                       }`}
                   />
                   <span
                     className={`text-xs font-bold ${myRecentRequest.status === "COMPLETED"
-                        ? "text-emerald-900"
-                        : "text-slate-500"
+                      ? "text-emerald-900"
+                      : "text-slate-500"
                       }`}
                   >
                     3. Bàn giao hỗ trợ

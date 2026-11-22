@@ -103,9 +103,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                             <p className="text-base font-black tracking-tight text-slate-900">
                                 {getPageTitle(pathname)}
                             </p>
-                            <p className="hidden text-xs font-semibold text-emerald-700/80 sm:block">
-                                Hỗ trợ minh bạch • Kết nối kịp thời
-                            </p>
                         </div>
                     </div>
 
@@ -189,8 +186,8 @@ function SidebarContent({
                                 href={item.href}
                                 onClick={onNavigate}
                                 className={`flex h-12 items-center gap-3.5 rounded-2xl px-4 text-sm font-black tracking-wide transition-all ${active
-                                        ? "bg-emerald-400 text-[#10261f] shadow-[0_4px_0_0_#059669] border border-emerald-300"
-                                        : "text-emerald-100/75 hover:bg-white/10 hover:text-white"
+                                    ? "bg-emerald-400 text-[#10261f] shadow-[0_4px_0_0_#059669] border border-emerald-300"
+                                    : "text-emerald-100/75 hover:bg-white/10 hover:text-white"
                                     }`}
                             >
                                 <span className={`flex size-6 items-center justify-center shrink-0 ${active ? "text-[#10261f]" : "text-emerald-300"}`}>

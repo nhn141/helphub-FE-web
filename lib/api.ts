@@ -241,7 +241,7 @@ export class ApiError extends Error {
 }
 
 export const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8081";
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 async function parseResponse<T>(response: Response): Promise<T> {
     const text = await response.text();
@@ -472,6 +472,19 @@ export async function refreshSession(
         },
     );
     return response.data;
+}
+
+export async function logout(accessToken?: string): Promise<void> {
+    if (!accessToken) {
+        return;
+    }
+    await apiRequest<ApiEnvelope<void>>(
+        "/api/v1/auth/logout",
+        {
+            method: "POST",
+        },
+        accessToken,
+    );
 }
 
 export async function getMyProfile(accessToken: string): Promise<UserProfile> {

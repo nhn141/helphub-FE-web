@@ -62,23 +62,42 @@ export function isAccessTokenExpired(
   return Date.now() + skewMs >= getAccessTokenExpiry(session);
 }
 
+// Biến module-level lưu Promise của request refresh đang thực thi (single-flight pattern).
+// Tránh việc nhiều component/request gọi refresh đồng thời làm phát sinh lỗi token rotation ở Backend.
+let activeRefreshPromise: Promise<StoredSession | null> | null = null;
+
 export async function getValidSession(): Promise<StoredSession | null> {
+  // 1. Nếu đang có một tiến trình refresh in-flight, dùng chung Promise đó
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
+  }
+
   const session = readSession();
 
   if (!session) {
     return null;
   }
 
+  // 2. Token còn hạn thì trả về ngay
   if (!isAccessTokenExpired(session)) {
     return session;
   }
 
-  try {
-    return saveSession(await refreshSession(session.refreshToken));
-  } catch {
-    clearSession();
-    return null;
-  }
+  // 3. Khởi tạo single-flight refresh Promise để gom các request đồng thời
+  activeRefreshPromise = (async () => {
+    try {
+      const refreshed = await refreshSession(session.refreshToken);
+      return saveSession(refreshed);
+    } catch (error) {
+      console.warn("Gia hạn phiên đăng nhập thất bại:", error);
+      clearSession();
+      return null;
+    } finally {
+      activeRefreshPromise = null;
+    }
+  })();
+
+  return activeRefreshPromise;
 }
 
 function canUseStorage(): boolean {

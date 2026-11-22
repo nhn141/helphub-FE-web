@@ -3,13 +3,14 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
-    Sparkles,
     HeartHandshake,
     ShieldCheck,
-    Users,
+    Hash,
+    MapPin,
+    FileText,
+    PlusCircle,
     ArrowUpRight,
-    MessageSquare,
-    Zap,
+    Users,
 } from "lucide-react";
 import { getPosts, getMyPosts, PostSummaryResponse } from "@/lib/social-api";
 import { getValidSession } from "@/lib/session";
@@ -81,9 +82,9 @@ export function SocialClient() {
         <div className="space-y-6">
             {/* Header */}
             <PageHeading
-                eyebrow="Cộng đồng sẻ chia"
-                title="Bảng tin kết nối"
-                description="Chia sẻ cập nhật, phối hợp nguồn lực và gắn kết mọi tấm lòng hảo tâm."
+                eyebrow="Mạng lưới hỗ trợ cộng đồng"
+                title="Bảng tin cộng đồng"
+                description="Nơi kết nối các hoàn cảnh khó khăn với những tấm lòng tình nguyện, cùng nhau sẻ chia và lan tỏa những câu chuyện ấm áp."
             />
 
             {/* Error Notice */}
@@ -160,13 +161,13 @@ export function SocialClient() {
                         <EmptyState
                             title={
                                 activeTab === "ALL"
-                                    ? "Chưa có bài viết nào trên bảng tin"
+                                    ? "Chưa có bài đăng nào trên bảng tin"
                                     : "Bạn chưa đăng bài viết nào"
                             }
                             description={
                                 activeTab === "ALL"
-                                    ? "Hãy là người đầu tiên mở lời chia sẻ câu chuyện hoặc cập nhật thông tin hỗ trợ!"
-                                    : "Chia sẻ tiến độ hoặc tình hình thực tế để mọi người cùng nắm bắt."
+                                    ? "Hãy chia sẻ câu chuyện đẹp, giới thiệu hoàn cảnh cần giúp đỡ hoặc kết nối cùng các tình nguyện viên khác."
+                                    : "Các bài viết bạn đã đăng sẽ xuất hiện tại đây."
                             }
                         />
                     ) : (
@@ -186,83 +187,143 @@ export function SocialClient() {
                     )}
                 </div>
 
-                {/* Right Sidebar: Duolingo & Twitter Widgets */}
+                {/* Right Sidebar: Community Volunteering Widgets */}
                 <div className="space-y-5 hidden lg:block">
-                    {/* Widget 1: Duolingo Community Mission Card */}
-                    <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white p-5 shadow-sm">
+                    {/* Widget 1: Volunteering Focus Areas */}
+                    <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white p-5 shadow-xs">
                         <div className="flex items-center gap-2.5">
-                            <div className="flex size-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800 shadow-[0_2px_0_0_#a7f3d0]">
-                                <Sparkles className="size-5" />
+                            <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 shadow-[0_2px_0_0_#a7f3d0]">
+                                <HeartHandshake className="size-4.5" />
                             </div>
                             <div>
-                                <h3 className="font-black text-slate-900 text-base leading-snug">
-                                    Sứ mệnh HelpHub
+                                <h3 className="font-black text-slate-900 text-sm leading-snug">
+                                    Hoàn cảnh cần giúp đỡ
                                 </h3>
-                                <p className="text-xs font-semibold text-emerald-700">
-                                    Lan tỏa yêu thương
+                                <p className="text-[11px] font-bold text-emerald-700">
+                                    Cùng chung tay hỗ trợ
                                 </p>
                             </div>
                         </div>
 
-                        <p className="mt-3.5 text-xs font-medium leading-relaxed text-slate-600">
-                            Mỗi bài đăng chia sẻ là một nhịp cầu kết nối người cần giúp đỡ đến những trái tim thiện nguyện kịp thời nhất.
-                        </p>
-
-                        <div className="mt-4 space-y-2.5 border-t-2 border-slate-100 pt-3.5">
-                            <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                                <span className="flex items-center gap-1.5">
-                                    <ShieldCheck className="size-4 text-emerald-600" />
-                                    Minh bạch 100%
-                                </span>
-                                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-black text-emerald-800 border border-emerald-200">
-                                    Xác thực
-                                </span>
+                        <div className="mt-3.5 space-y-2 border-t-2 border-slate-100 pt-3 text-xs">
+                            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
+                                <p className="font-bold text-slate-900">
+                                    Tiếp sức đến trường
+                                </p>
+                                <p className="mt-0.5 text-[11px] text-slate-500 font-medium leading-relaxed">
+                                    Tặng sách vở, đồ dùng học tập và học bổng cho học sinh nghèo vượt khó.
+                                </p>
                             </div>
-                            <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                                <span className="flex items-center gap-1.5">
-                                    <HeartHandshake className="size-4 text-emerald-600" />
-                                    Hỗ trợ trực tiếp
-                                </span>
-                                <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-[10px] font-black text-sky-800 border border-sky-200">
-                                    24/7
-                                </span>
+
+                            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
+                                <p className="font-bold text-slate-900">
+                                    Người già neo đơn
+                                </p>
+                                <p className="mt-0.5 text-[11px] text-slate-500 font-medium leading-relaxed">
+                                    Thăm hỏi, chăm sóc sinh hoạt và hỗ trợ nhu yếu phẩm định kỳ.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
+                                <p className="font-bold text-slate-900">
+                                    Hỗ trợ người yếu thế
+                                </p>
+                                <p className="mt-0.5 text-[11px] text-slate-500 font-medium leading-relaxed">
+                                    Đồng hành cùng người khuyết tật và các gia đình có hoàn cảnh khó khăn.
+                                </p>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Widget 2: Quick Campaign Discovery */}
-                    <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white p-5 shadow-sm">
-                        <div className="flex items-center gap-2">
-                            <Zap className="size-4 text-amber-500" />
-                            <h3 className="font-black text-slate-900 text-sm">
-                                Yêu cầu cần hỗ trợ
-                            </h3>
-                        </div>
-                        <p className="mt-1 text-xs font-medium text-slate-500">
-                            Khám phá các hoàn cảnh và khu vực đang cần tình nguyện viên chung tay.
-                        </p>
 
                         <Link
                             href="/support-requests"
-                            className="mt-4 flex h-10 w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-slate-200 bg-slate-50 text-xs font-black text-slate-700 shadow-[0_2px_0_0_#cbd5e1] hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 active:translate-y-0.5 active:shadow-none transition cursor-pointer"
+                            className="mt-3.5 flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-black text-slate-700 shadow-[0_2px_0_0_#cbd5e1] hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 active:translate-y-0.5 active:shadow-none transition cursor-pointer"
                         >
-                            <span>Xem danh sách yêu cầu</span>
+                            <span>Xem danh sách hoàn cảnh</span>
                             <ArrowUpRight className="size-3.5" />
                         </Link>
                     </div>
 
-                    {/* Widget 3: Community Guidelines */}
-                    <div className="rounded-3xl border-2 border-slate-200 bg-slate-50/60 p-5 text-xs text-slate-500 space-y-2">
-                        <p className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">
-                            Quy tắc bảng tin:
-                        </p>
-                        <ul className="space-y-1.5 list-disc list-inside font-medium leading-relaxed">
-                            <li>Chia sẻ thông tin chân thực, có tâm.</li>
-                            <li>Tôn trọng người gặp khó khăn và tình nguyện viên.</li>
-                            <li>Đính kèm ảnh thực tế nếu có để tăng độ xác thực.</li>
+                    {/* Widget 2: Quick Actions */}
+                    <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white p-5 shadow-xs space-y-2.5">
+                        <h3 className="font-black text-xs uppercase tracking-wider text-slate-500">
+                            Thao tác nhanh
+                        </h3>
+
+                        <Link
+                            href="/support-requests/new"
+                            className="flex items-center justify-between rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-3 text-xs font-black text-emerald-950 shadow-[0_2px_0_0_#a7f3d0] hover:bg-emerald-100 transition active:translate-y-0.5 active:shadow-none"
+                        >
+                            <span className="flex items-center gap-2">
+                                <PlusCircle className="size-4 text-emerald-700" />
+                                Gửi hoàn cảnh cần giúp đỡ
+                            </span>
+                            <ArrowUpRight className="size-3.5" />
+                        </Link>
+
+                        <Link
+                            href="/support-locations"
+                            className="flex items-center justify-between rounded-2xl border-2 border-slate-200 bg-slate-50 p-3 text-xs font-black text-slate-700 shadow-[0_2px_0_0_#cbd5e1] hover:bg-slate-100 hover:border-slate-300 transition active:translate-y-0.5 active:shadow-none"
+                        >
+                            <span className="flex items-center gap-2">
+                                <MapPin className="size-4 text-emerald-600" />
+                                Điểm tiếp nhận & quyên góp
+                            </span>
+                            <ArrowUpRight className="size-3.5" />
+                        </Link>
+
+                        <Link
+                            href="/support-requests"
+                            className="flex items-center justify-between rounded-2xl border-2 border-slate-200 bg-slate-50 p-3 text-xs font-black text-slate-700 shadow-[0_2px_0_0_#cbd5e1] hover:bg-slate-100 hover:border-slate-300 transition active:translate-y-0.5 active:shadow-none"
+                        >
+                            <span className="flex items-center gap-2">
+                                <FileText className="size-4 text-slate-600" />
+                                Danh sách các hoàn cảnh
+                            </span>
+                            <ArrowUpRight className="size-3.5" />
+                        </Link>
+                    </div>
+
+                    {/* Widget 3: Trending Topics */}
+                    <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white p-5 shadow-xs">
+                        <div className="flex items-center gap-2">
+                            <Hash className="size-4 text-emerald-700" />
+                            <h3 className="font-black text-slate-900 text-sm">
+                                Chủ đề quan tâm
+                            </h3>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                            {[
+                                "#TiepSucDenTruong",
+                                "#NguoiGiaNeoDon",
+                                "#NhuYeuPham",
+                                "#NhomTinhNguyen",
+                                "#NuCuoiTreTho",
+                                "#TraoYeuThuong",
+                            ].map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 cursor-pointer transition"
+                                >
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Widget 4: Community Guidelines */}
+                    <div className="rounded-3xl border-2 border-slate-200 bg-slate-50/70 p-4 text-xs text-slate-600 space-y-2">
+                        <div className="flex items-center gap-1.5 font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+                            <ShieldCheck className="size-4 text-emerald-700" />
+                            <span>Nguyên tắc chia sẻ văn minh</span>
+                        </div>
+                        <ul className="space-y-1.5 list-disc list-inside font-medium leading-relaxed text-[11px] text-slate-600">
+                            <li>Tôn trọng danh dự và quyền riêng tư của người được giúp đỡ.</li>
+                            <li>Nêu rõ hoàn cảnh cụ thể, địa chỉ và thông tin người bảo trợ xác minh.</li>
+                            <li>Chủ động cập nhật khi hoàn cảnh đã nhận đủ sự hỗ trợ.</li>
+                            <li>Tất cả vì tinh thần thiện nguyện tự nguyện, minh bạch và phi lợi nhuận.</li>
                         </ul>
-                        <p className="text-[11px] text-slate-400 pt-1">
-                            © HelpHub Community • Chung tay vì cộng đồng
+                        <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-200">
+                            © 2026 HelpHub • Mạng xã hội hỗ trợ cộng đồng
                         </p>
                     </div>
                 </div>
