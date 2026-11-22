@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 
 import { useAuth } from "@/components/auth-provider";
 import { NotificationBell } from "@/components/notification-bell";
@@ -50,16 +50,46 @@ export function AppShell({ children }: { children: ReactNode }) {
     const pathname = usePathname();
     const { profile, logout } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem("helphub_sidebar_collapsed");
+            if (saved !== null) {
+                setIsCollapsed(saved === "true");
+            }
+        } catch {
+            // ignore localStorage unavailable
+        }
+    }, []);
+
+    const toggleCollapse = () => {
+        setIsCollapsed((prev) => {
+            const next = !prev;
+            try {
+                localStorage.setItem("helphub_sidebar_collapsed", String(next));
+            } catch {
+                // ignore
+            }
+            return next;
+        });
+    };
 
     return (
         <div className="min-h-dvh bg-[#f4f6f2] text-slate-950 font-sans">
-            {/* Desktop Duolingo-style Sidebar */}
-            <aside className="fixed inset-y-0 left-0 z-40 hidden w-68 border-r-2 border-emerald-950/40 bg-[#10261f] text-white lg:flex lg:flex-col shadow-xl">
+            {/* Desktop Duolingo-style Collapsible Sidebar */}
+            <aside
+                className={`fixed inset-y-0 left-0 z-40 hidden border-r-2 border-emerald-950/40 bg-[#10261f] text-white lg:flex lg:flex-col shadow-xl overflow-x-hidden transition-all duration-300 ease-in-out ${
+                    isCollapsed ? "w-20" : "w-68"
+                }`}
+            >
                 <SidebarContent
                     pathname={pathname}
                     profileName={profile.fullName}
                     profileRole={ROLE_LABELS[profile.role]}
                     profileRoleValue={profile.role}
+                    isCollapsed={isCollapsed}
+                    onToggleCollapse={toggleCollapse}
                     onLogout={logout}
                 />
             </aside>
@@ -69,16 +99,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <div className="fixed inset-0 z-50 lg:hidden">
                     <button
                         type="button"
-                        aria-label="Close menu"
+                        aria-label="Đóng menu"
                         className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"
                         onClick={() => setMobileMenuOpen(false)}
                     />
-                    <aside className="relative flex h-full w-[min(86vw,320px)] flex-col bg-[#10261f] text-white shadow-2xl border-r-2 border-emerald-950/40">
+                    <aside className="relative flex h-full w-[min(86vw,320px)] flex-col bg-[#10261f] text-white shadow-2xl border-r-2 border-emerald-950/40 animate-in slide-in-from-left duration-200">
                         <SidebarContent
                             pathname={pathname}
                             profileName={profile.fullName}
                             profileRole={ROLE_LABELS[profile.role]}
                             profileRoleValue={profile.role}
+                            isCollapsed={false}
+                            isMobileDrawer={true}
+                            onToggleCollapse={() => setMobileMenuOpen(false)}
                             onNavigate={() => setMobileMenuOpen(false)}
                             onLogout={logout}
                         />
@@ -87,18 +120,35 @@ export function AppShell({ children }: { children: ReactNode }) {
             ) : null}
 
             {/* Main content area */}
-            <div className="lg:pl-68">
+            <div
+                className={`transition-[padding-left] duration-300 ease-in-out ${
+                    isCollapsed ? "lg:pl-20" : "lg:pl-68"
+                }`}
+            >
                 {/* Header */}
                 <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b-2 border-slate-200/80 bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:px-8 shadow-xs">
                     <div className="flex items-center gap-3">
+                        {/* Mobile hamburger button */}
                         <button
                             type="button"
-                            aria-label="Open menu"
+                            aria-label="Mở menu"
                             onClick={() => setMobileMenuOpen(true)}
                             className="flex size-10 items-center justify-center rounded-xl border-2 border-slate-200 bg-white text-slate-700 shadow-[0_2px_0_0_#cbd5e1] active:translate-y-0.5 active:shadow-none lg:hidden cursor-pointer"
                         >
                             <MenuIcon />
                         </button>
+
+                        {/* Desktop sidebar collapse/expand toggle button */}
+                        <button
+                            type="button"
+                            aria-label={isCollapsed ? "Mở rộng thanh bên" : "Thu gọn thanh bên"}
+                            title={isCollapsed ? "Mở rộng thanh bên" : "Thu gọn thanh bên"}
+                            onClick={toggleCollapse}
+                            className="hidden size-10 items-center justify-center rounded-xl border-2 border-slate-200 bg-white text-slate-700 shadow-[0_2px_0_0_#cbd5e1] hover:bg-slate-50 active:translate-y-0.5 active:shadow-none lg:flex cursor-pointer transition"
+                        >
+                            <PanelLeftIcon collapsed={isCollapsed} />
+                        </button>
+
                         <div>
                             <p className="text-base font-black tracking-tight text-slate-900">
                                 {getPageTitle(pathname)}
@@ -140,6 +190,9 @@ function SidebarContent({
     profileName,
     profileRole,
     profileRoleValue,
+    isCollapsed = false,
+    onToggleCollapse,
+    isMobileDrawer = false,
     onNavigate,
     onLogout,
 }: {
@@ -147,26 +200,59 @@ function SidebarContent({
     profileName: string;
     profileRole: string;
     profileRoleValue: UserRole;
+    isCollapsed?: boolean;
+    onToggleCollapse?: () => void;
+    isMobileDrawer?: boolean;
     onNavigate?: () => void;
     onLogout: () => void;
 }) {
     return (
         <>
             {/* Duolingo Brand Header */}
-            <div className="flex h-20 items-center gap-3.5 border-b-2 border-white/10 px-6">
-                <div className="flex size-11 items-center justify-center rounded-2xl bg-white p-1.5 shadow-[0_4px_0_0_#059669]">
-                    <HelpHubLogo className="size-full" />
+            <div
+                className={`flex h-20 items-center border-b-2 border-white/10 ${
+                    isCollapsed ? "justify-center px-2" : "justify-between px-5"
+                }`}
+            >
+                <div className={`flex items-center gap-3 min-w-0 ${isCollapsed ? "justify-center" : ""}`}>
+                    <button
+                        type="button"
+                        onClick={isCollapsed ? onToggleCollapse : undefined}
+                        title={isCollapsed ? "Mở rộng thanh bên" : "HelpHub"}
+                        className={`flex size-11 items-center justify-center rounded-2xl bg-white p-1.5 shadow-[0_4px_0_0_#059669] shrink-0 ${
+                            isCollapsed ? "cursor-pointer hover:scale-105 active:scale-95 transition" : ""
+                        }`}
+                    >
+                        <HelpHubLogo className="size-full" />
+                    </button>
+                    {!isCollapsed && (
+                        <div className="min-w-0">
+                            <p className="text-xl font-black tracking-wide text-white truncate">HelpHub</p>
+                            <p className="text-[11px] font-bold text-emerald-300/80 uppercase tracking-wider truncate">
+                                Cổng hỗ trợ & kết nối
+                            </p>
+                        </div>
+                    )}
                 </div>
-                <div>
-                    <p className="text-xl font-black tracking-wide text-white">HelpHub</p>
-                    <p className="text-[11px] font-bold text-emerald-300/80 uppercase tracking-wider">
-                        Cổng hỗ trợ & kết nối
-                    </p>
-                </div>
+
+                {isMobileDrawer ? (
+                    <button
+                        type="button"
+                        onClick={onToggleCollapse}
+                        aria-label="Đóng thanh bên"
+                        className="flex size-9 items-center justify-center rounded-xl bg-white/10 text-emerald-200 hover:bg-white/20 hover:text-white transition cursor-pointer"
+                    >
+                        <CloseIcon />
+                    </button>
+                ) : null}
             </div>
 
             {/* Navigation items Duolingo tactile style */}
-            <nav className="flex-1 space-y-2 px-3.5 py-6">
+            <nav
+                className={`flex-1 space-y-2 py-6 overflow-y-auto ${
+                    isCollapsed ? "px-2" : "px-3.5"
+                }`}
+            >
                 {navigation
                     .filter(
                         (item) =>
@@ -185,56 +271,84 @@ function SidebarContent({
                                 key={item.href}
                                 href={item.href}
                                 onClick={onNavigate}
-                                className={`flex h-12 items-center gap-3.5 rounded-2xl px-4 text-sm font-black tracking-wide transition-all ${active
-                                    ? "bg-emerald-400 text-[#10261f] shadow-[0_4px_0_0_#059669] border border-emerald-300"
-                                    : "text-emerald-100/75 hover:bg-white/10 hover:text-white"
-                                    }`}
+                                title={item.label}
+                                className={`flex h-12 items-center rounded-2xl transition-all ${
+                                    isCollapsed
+                                        ? "justify-center w-12 mx-auto px-0"
+                                        : "gap-3.5 px-4"
+                                } ${
+                                    active
+                                        ? "bg-emerald-400 text-[#10261f] shadow-[0_4px_0_0_#059669] border border-emerald-300"
+                                        : "text-emerald-100/75 hover:bg-white/10 hover:text-white"
+                                }`}
                             >
                                 <span className={`flex size-6 items-center justify-center shrink-0 ${active ? "text-[#10261f]" : "text-emerald-300"}`}>
                                     <Icon />
                                 </span>
-                                <span>{item.label}</span>
+                                {!isCollapsed && <span className="truncate">{item.label}</span>}
                             </Link>
                         );
                     })}
             </nav>
 
             {/* Duolingo-style Profile Card */}
-            <div className="border-t-2 border-white/10 p-4">
-                <div className="rounded-2xl border-2 border-white/15 bg-white/5 p-4 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 font-black text-sm">
-                            {getInitials(profileName)}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-black text-white">
-                                {profileName}
-                            </p>
-                            <span className="inline-block mt-0.5 rounded-full border border-emerald-400/30 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-300">
-                                {profileRole}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="mt-3.5 flex gap-2">
+            <div className="border-t-2 border-white/10 p-3 sm:p-4">
+                {isCollapsed ? (
+                    <div className="flex flex-col items-center gap-2.5">
                         <Link
                             href="/profile"
                             onClick={onNavigate}
-                            className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-500/15 text-xs font-bold text-emerald-200 shadow-[0_2px_0_0_rgba(16,185,129,0.2)] hover:bg-emerald-500/25 active:translate-y-0.5 active:shadow-none transition"
+                            title={`${profileName} (${profileRole}) - Xem hồ sơ`}
+                            className="flex size-11 items-center justify-center rounded-2xl bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 font-black text-sm hover:bg-emerald-400/30 transition shadow-sm"
                         >
-                            <UserIcon />
-                            Hồ sơ
+                            {getInitials(profileName)}
                         </Link>
                         <button
                             type="button"
                             onClick={onLogout}
-                            className="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 text-xs font-bold text-white/80 shadow-[0_2px_0_0_rgba(255,255,255,0.1)] hover:bg-white/10 hover:text-white active:translate-y-0.5 active:shadow-none transition cursor-pointer"
                             title="Đăng xuất"
+                            aria-label="Đăng xuất"
+                            className="flex size-10 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white active:translate-y-0.5 active:shadow-none transition cursor-pointer"
                         >
                             <LogoutIcon />
                         </button>
                     </div>
-                </div>
+                ) : (
+                    <div className="rounded-2xl border-2 border-white/15 bg-white/5 p-4 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 font-black text-sm">
+                                {getInitials(profileName)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-black text-white">
+                                    {profileName}
+                                </p>
+                                <span className="inline-block mt-0.5 rounded-full border border-emerald-400/30 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-emerald-300">
+                                    {profileRole}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="mt-3.5 flex gap-2">
+                            <Link
+                                href="/profile"
+                                onClick={onNavigate}
+                                className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-500/15 text-xs font-bold text-emerald-200 shadow-[0_2px_0_0_rgba(16,185,129,0.2)] hover:bg-emerald-500/25 active:translate-y-0.5 active:shadow-none transition"
+                            >
+                                <UserIcon />
+                                Hồ sơ
+                            </Link>
+                            <button
+                                type="button"
+                                onClick={onLogout}
+                                className="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 text-xs font-bold text-white/80 shadow-[0_2px_0_0_rgba(255,255,255,0.1)] hover:bg-white/10 hover:text-white active:translate-y-0.5 active:shadow-none transition cursor-pointer"
+                                title="Đăng xuất"
+                            >
+                                <LogoutIcon />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
@@ -443,6 +557,45 @@ function UserIcon() {
         >
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
             <circle cx="14" cy="7" r="4" />
+        </svg>
+    );
+}
+
+function PanelLeftIcon({ collapsed }: { collapsed?: boolean }) {
+    return (
+        <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="M9 3v18" />
+            {collapsed ? (
+                <path d="m14 9 3 3-3 3" />
+            ) : (
+                <path d="m17 15-3-3 3-3" />
+            )}
+        </svg>
+    );
+}
+
+function CloseIcon() {
+    return (
+        <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+        >
+            <path d="M18 6 6 18M6 6l12 12" />
         </svg>
     );
 }

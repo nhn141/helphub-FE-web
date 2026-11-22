@@ -3,6 +3,7 @@ import Image from "next/image";
 import { HeroCTA } from "@/components/hero-cta";
 import { HeroHeading } from "@/components/hero-heading";
 import { HelpHubLogo } from "@/components/helphub-logo";
+import { LandingCarousel } from "@/components/landing-carousel";
 
 export const metadata = {
   title: "HelpHub – Kết nối hỗ trợ cộng đồng",
@@ -174,6 +175,25 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Community Stories Carousel ── */}
+      <section className="border-b border-slate-200/80 bg-white py-16 sm:py-24 overflow-hidden">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-10 text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">
+              Những hành trình sẻ chia
+            </span>
+            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+              Hoạt động cộng đồng nổi bật
+            </h2>
+            <p className="mt-3 text-base text-slate-500 sm:text-lg max-w-2xl mx-auto">
+              Cùng nhìn lại những hoàn cảnh đã được tiếp sức kịp thời nhờ sự chung tay của hàng nghìn tình nguyện viên trên HelpHub.
+            </p>
+          </div>
+
+          <LandingCarousel />
         </div>
       </section>
 
